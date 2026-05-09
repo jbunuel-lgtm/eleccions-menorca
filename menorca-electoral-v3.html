@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultats Electorals · Menorca</title>
+<style>
+:root {
+  --bg: #f4f1eb;
+  --ink: #161410;
+  --surface: #fff;
+  --border: #d6cfc2;
+  --muted: #7a7468;
+  --accent: #c0311a;
+  --accent2: #1a4a88;
+  --up: #1a6e30;
+  --down: #c0311a;
+  --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); min-height: 100vh; overflow-x: hidden; font-size: 14px; }
+
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--ink);
+  color: #fff;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: stretch;
+  border-bottom: 3px solid var(--accent);
+  gap: 0;
+}
+.masthead-brand {
+  padding: 18px 28px 18px 0;
+  border-right: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.masthead-eyebrow {
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.masthead-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+}
+.masthead-title span { color: rgba(255,255,255,.32); font-weight: 400; }
+
+/* ── MASTHEAD RIGHT ── */
+.masthead-right {
+  padding: 18px 0 18px 24px;
+  border-left: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 7px;
+}
+.live-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent); color: #fff;
+  font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 2px; font-weight: 600;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: blink 1.2s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.masthead-meta {
+  font-size: .62rem;
+  color: rgba(255,255,255,.38);
+  text-align: right;
+  line-height: 1.9;
+  font-variant-numeric: tabular-nums;
+}
+.masthead-meta strong { color: rgba(255,255,255,.7); }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  background: var(--ink);
+  display: flex;
+  padding: 0 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  font-size: .68rem; letter-spacing: .07em; text-transform: uppercase;
+  padding: 12px 20px; border: none; background: none; cursor: pointer;
+  color: rgba(255,255,255,.38); border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s; white-space: nowrap;
+  font-weight: 500; font-family: var(--font);
+}
+.tab-btn:hover { color: rgba(255,255,255,.65); }
+.tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+/* ── MAIN ── */
+.main-wrap { max-width: 1180px; margin: 0 auto; padding: 32px 28px 80px; }
+.section-kicker { font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+.section-heading { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); }
+
+/* ── SCRUTINY CARD ── */
+.scrut-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+.scrut-pct { font-size: 2.4rem; font-weight: 700; color: var(--accent2); letter-spacing: -.03em; line-height: 1; }
+.scrut-pct small { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+.scrut-sub { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; font-weight: 500; }
+.scrut-bar-label { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+.scrut-bar { height: 6px; background: #e8e3d8; }
+.scrut-bar-fill { height: 100%; background: var(--accent2); transition: width 1.2s ease; }
+.scrut-bar-info { font-size: .68rem; color: var(--muted); margin-top: 5px; }
+.scrut-bar-info .live { color: var(--accent); font-weight: 600; }
+.scrut-bar-info .done { color: var(--up); font-weight: 600; }
+.scrut-right { text-align: right; }
+.scrut-right-val { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; }
+.scrut-right-label { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; font-weight: 500; }
+.scrut-right-sub { font-size: .65rem; color: var(--muted); margin-top: 3px; }
+
+/* ── RESULTS CARD ── */
+.results-card { background: var(--surface); border: 1.5px solid var(--border); margin-bottom: 24px; overflow: hidden; }
+.results-card-header { background: var(--ink); color: #fff; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; }
+.results-card-title { font-size: .82rem; font-weight: 700; letter-spacing: -.01em; }
+.results-card-meta { font-size: .6rem; color: rgba(255,255,255,.42); letter-spacing: .04em; }
+.table-head { display: grid; grid-template-columns: 2fr 88px 78px 1fr 110px; padding: 8px 18px; background: #f0ebe0; border-bottom: 1px solid var(--border); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.table-row { display: grid; grid-template-columns: 2fr 88px 78px 1fr 110px; padding: 11px 18px; border-bottom: 1px solid var(--border); align-items: center; transition: background .12s; }
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: #faf7f2; }
+.party-cell { display: flex; align-items: center; gap: 9px; }
+.party-swatch { width: 3px; height: 30px; flex-shrink: 0; }
+.party-name { font-size: .85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.party-full { font-size: .65rem; color: var(--muted); margin-top: 1px; }
+.votes-cell { font-size: .8rem; font-variant-numeric: tabular-nums; }
+.pct-cell { font-size: .85rem; font-weight: 600; color: var(--accent2); font-variant-numeric: tabular-nums; }
+.bar-cell { padding-right: 10px; }
+.bar-wrap { height: 4px; background: #e8e3d8; }
+.bar-fill { height: 100%; transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+.seats-cell { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+.seat { width: 9px; height: 9px; border-radius: 1px; }
+.seats-num { font-size: .78rem; font-weight: 700; margin-left: 3px; font-variant-numeric: tabular-nums; }
+
+/* ── TREND BADGES ── */
+.trend { display: inline-flex; align-items: center; gap: 2px; font-size: .6rem; font-weight: 600; padding: 1px 4px; border-radius: 2px; }
+.t-up { background: #daf0e0; color: var(--up); }
+.t-dn { background: #fde8e4; color: var(--down); }
+.t-eq { background: #ece8df; color: var(--muted); }
+.t-new { background: #fff3cd; color: #7a5a00; }
+
+/* ── HEMICICLE ── */
+.hemicicle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 22px; }
+.hemi-card { background: var(--surface); border: 1.5px solid var(--border); padding: 20px; }
+.hemi-label { font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; font-weight: 500; }
+.hemi-title { font-size: .9rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -.01em; }
+svg.hemi { width: 100%; overflow: visible; }
+.hemi-legend { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.hemi-legend-item { display: flex; align-items: center; gap: 4px; font-size: .62rem; color: var(--muted); }
+
+/* ── CRITICAL CARD ── */
+.critical-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.critical-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.critical-label { font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; font-weight: 500; }
+.critical-val { font-size: 1.05rem; font-weight: 700; letter-spacing: -.01em; }
+.critical-sub { font-size: .65rem; color: var(--muted); margin-top: 2px; }
+
+/* ── PARTS GRID ── */
+.part-section { background: var(--surface); border: 1.5px solid var(--border); padding: 16px 20px; margin-bottom: 20px; }
+.part-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.part-label { font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; font-weight: 500; }
+.part-value { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.part-sub { font-size: .65rem; color: var(--muted); margin-top: 2px; }
+.part-bar { height: 3px; background: #e8e3d8; margin-top: 7px; }
+.part-bar-fill { height: 100%; background: var(--accent2); }
+
+/* ── MUNI TABLE ── */
+.muni-table-wrap { overflow-x: auto; }
+.muni-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+.muni-table th { text-align: right; padding: 8px 10px; font-size: .57rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: #f0ebe0; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.muni-table th:first-child { text-align: left; padding-left: 16px; }
+.muni-table th.scrut-th { color: var(--accent); }
+.muni-table td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.muni-table td:first-child { text-align: left; padding-left: 16px; font-weight: 600; white-space: nowrap; }
+.muni-table tr:nth-child(even) td { background: #faf7f2; }
+.muni-table tr:hover td { background: #f5f0e6; }
+.muni-table tr.total-row td { background: var(--ink); color: #fff; font-weight: 700; }
+.muni-table tr.total-row td:first-child { font-weight: 700; }
+.scrut-mini { font-size: .65rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.scrut-mini-bar { height: 2px; background: #e8e3d8; margin-top: 2px; }
+.scrut-mini-fill { height: 100%; background: var(--accent2); }
+
+/* ── SEATS BARS ── */
+.seats-bar-item { margin-bottom: 8px; }
+.seats-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.seats-bar-name { font-size: .8rem; font-weight: 600; }
+.seats-bar-val { font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.seats-bar-track { height: 7px; background: #e8e3d8; }
+.seats-bar-fill { height: 100%; transition: width 1s ease; }
+
+/* ── TABS ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── FOOTER ── */
+.footer-bar { background: var(--ink); color: rgba(255,255,255,.32); font-size: .62rem; padding: 12px 28px; display: flex; justify-content: space-between; letter-spacing: .03em; }
+.footer-bar strong { color: rgba(255,255,255,.6); }
+
+/* ── ANIMATE ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.anim { animation: fadeUp .3s ease both; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:720px){
+  .masthead { grid-template-columns: 1fr; }
+  .masthead-right { flex-direction: row; justify-content: space-between; padding: 12px 0 0; border-top: 1px solid rgba(255,255,255,.07); border-left: none; }
+  .main-wrap { padding: 20px 14px 60px; }
+  .hemicicle-row { grid-template-columns: 1fr; }
+  .table-head,.table-row { grid-template-columns: 2fr 72px 68px; }
+  .table-head>:nth-child(4),.table-head>:nth-child(5),
+  .table-row>:nth-child(4),.table-row>:nth-child(5) { display: none; }
+  .part-grid { grid-template-columns: repeat(2,1fr); }
+  .scrut-card { grid-template-columns: auto 1fr; }
+  .scrut-card>:last-child { display: none; }
+
+}
+</style>
+</head>
+<body>
+
+<!-- ══ MASTHEAD ══ -->
+<header class="masthead">
+  <div class="masthead-brand">
+    <div class="masthead-eyebrow">Eleccions Municipals i Autonòmiques · Menorca</div>
+    <div class="masthead-title">Resultats <span>Electorals</span></div>
+  </div>
+
+  <div class="masthead-right">
+    <div class="live-pill"><div class="live-dot"></div> En directe</div>
+    <div class="masthead-meta">
+      Actualitzat: <strong id="clock-val">—</strong><br>
+      Refresc en: <strong id="countdown-val">2:00</strong><br>
+      Ref. hist.: 28M 2023
+    </div>
+  </div>
+</header>
+
+<!-- ══ NAV TABS ══ -->
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('cime')">Consell Insular</button>
+  <button class="tab-btn" onclick="switchTab('parlament')">Parlament</button>
+  <button class="tab-btn" onclick="switchTab('mao')">Maó</button>
+  <button class="tab-btn" onclick="switchTab('ciutadella')">Ciutadella</button>
+  <button class="tab-btn" onclick="switchTab('alaior')">Alaior</button>
+  <button class="tab-btn" onclick="switchTab('ferreries')">Ferreries</button>
+  <button class="tab-btn" onclick="switchTab('mercadal')">es Mercadal</button>
+  <button class="tab-btn" onclick="switchTab('santlluis')">Sant Lluís</button>
+  <button class="tab-btn" onclick="switchTab('escastell')">es Castell</button>
+  <button class="tab-btn" onclick="switchTab('migjorn')">es Migjorn Gran</button>
+</nav>
+
+<div class="main-wrap">
+  <div class="tab-panel active" id="panel-cime"></div>
+  <div class="tab-panel" id="panel-parlament"></div>
+  <div class="tab-panel" id="panel-mao"></div>
+  <div class="tab-panel" id="panel-ciutadella"></div>
+  <div class="tab-panel" id="panel-alaior"></div>
+  <div class="tab-panel" id="panel-ferreries"></div>
+  <div class="tab-panel" id="panel-mercadal"></div>
+  <div class="tab-panel" id="panel-santlluis"></div>
+  <div class="tab-panel" id="panel-escastell"></div>
+  <div class="tab-panel" id="panel-migjorn"></div>
+</div>
+
+<footer class="footer-bar">
+  <div>Menorca Eleccions · Font: Junta Electoral de Zona</div>
+  <div>Darrera actualització: <strong id="footer-time">—</strong></div>
+</footer>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const JSON_URL = 'https://script.google.com/macros/s/AKfycbzLJyZvAllstEuz6DsA02ce1oSxK1ogcAow_h-cJi379umB32AnZyfc_k8d7Vg_xFr0lg/exec';
+const REFRESH_SECONDS = 60;
+
+// ── COLORS ──────────────────────────────────────────────────
+const C = {
+  // ── Partits supramunicipals ──────────────────────────────
+  PSOE:          '#c0311a',  // vermell
+  'MÉS':         '#c8960a',  // groc daurat
+  UP:            '#6d28d9',  // lila
+  PP:            '#1a4a88',  // blau
+  VOX:           '#3a7d44',  // verd
+  Cs:            '#c86020',  // taronja
+  PLIE:          '#b0a898',  // crema gris (sobre fons clar)
+  // ── Candidatures locals: grisos diferenciats ─────────────
+  'ARA MAÓ':     '#7a7a7a',  // gris mig
+  ENTESA:        '#606060',  // gris fosc
+  AVANCEM:       '#5a7060',  // gris verdós (MÉS+UP Alaior)
+  VOLEM:         '#7a7a7a',  // gris
+  SOM:           '#6a6a6a',  // gris
+  PSM:           '#a07818',  // groc torrat (Ciutadella)
+  'C. ENDAVANT': '#3a5a9a',  // blau grisós
+  IPEC:          '#1a1410',  // negre
+  XBALEARS:      '#4a6a8a',  // blau gris
+};
+
+// ── CURRENT DATA ────────────────────────────────────────────
+const CURRENT = {
+  cime:{
+    label:'Consell Insular de Menorca',totalSeats:13,
+    totalMeses:182,mesasEscrutades:182,
+    participation:'48,04%',cens:71736,
+    partits:[
+      {nom:'PP',    complet:'Partido Popular',    color:C.PP,   vots:15368,escons:6},
+      {nom:'PSOE',  complet:'Partido Socialista', color:C.PSOE, vots:10547,escons:4},
+      {nom:'MÉS',   complet:'MÉS per Menorca',    color:C['MÉS'],vots:6772,escons:2},
+      {nom:'VOX',   complet:'Vox',                color:C.VOX,  vots:2420, escons:1},
+      {nom:'UP',    complet:'Unides Podem',       color:C.UP,   vots:2388, escons:0},
+      {nom:'Cs',    complet:'Ciudadanos',         color:C.Cs,   vots:520,  escons:0},
+      {nom:'PLIE',  complet:'PLIE',               color:C.PLIE, vots:169,  escons:0},
+    ],
+    darrerEsco:{parti:'VOX',valor:2420},
+    aPunt:{parti:'UP',valor:2388,votesFalta:32},
+    municipis:[
+      {nom:'Alaior',         meses:10,mesasEscr:10,part:'63,20%',cens:7024, vots:{PSOE:1124,PP:2047,'MÉS':604,UP:221,Cs:19,VOX:194,PLIE:7}},
+      {nom:'Ciutadella',     meses:32,mesasEscr:32,part:'35,78%',cens:23234,vots:{PSOE:2419,PP:4505,'MÉS':2553,UP:718,Cs:255,VOX:703,PLIE:79}},
+      {nom:'Ferreries',      meses:6, mesasEscr:6, part:'64,98%',cens:3903, vots:{PSOE:599,PP:1123,'MÉS':562,UP:112,Cs:17,VOX:110,PLIE:12}},
+      {nom:'Maó',            meses:32,mesasEscr:32,part:'51,51%',cens:21493,vots:{PSOE:3757,PP:4326,'MÉS':1562,UP:757,Cs:156,VOX:802,PLIE:42}},
+      {nom:'es Mercadal',    meses:5, mesasEscr:3, part:'34,52%',cens:3983, vots:{PSOE:621,PP:691,'MÉS':468,UP:105,Cs:7,VOX:164,PLIE:2}},
+      {nom:'Sant Lluís',     meses:9, mesasEscr:9, part:'48,74%',cens:5207, vots:{PSOE:840,PP:993,'MÉS':376,UP:201,Cs:34,VOX:183,PLIE:8}},
+      {nom:'es Castell',     meses:9, mesasEscr:9, part:'57,28%',cens:5690, vots:{PSOE:959,PP:1271,'MÉS':473,UP:253,Cs:28,VOX:241,PLIE:16}},
+      {nom:'es Migjorn Gran',meses:2, mesasEscr:2, part:'77,29%',cens:1202, vots:{PSOE:228,PP:412,'MÉS':174,UP:21,Cs:4,VOX:23,PLIE:3}},
+    ]
+  },
+  parlament:{
+    label:'Parlament de les Illes Balears',totalSeats:13,
+    totalMeses:182,mesasEscrutades:182,
+    participation:'37,66%',cens:70621,
+    partits:[
+      {nom:'PP',   complet:'Partido Popular',    color:C.PP,    vots:15044,escons:5},
+      {nom:'PSOE', complet:'Partido Socialista', color:C.PSOE,  vots:10378,escons:4},
+      {nom:'MÉS',  complet:'MÉS per Menorca',    color:C['MÉS'],vots:6455, escons:2},
+      {nom:'UP',   complet:'Unides Podem',       color:C.UP,    vots:2634, escons:1},
+      {nom:'VOX',  complet:'Vox',                color:C.VOX,   vots:2772, escons:1},
+      {nom:'Cs',   complet:'Ciudadanos',         color:C.Cs,    vots:550,  escons:0},
+      {nom:'PLIE', complet:'PLIE',               color:C.PLIE,  vots:165,  escons:0},
+    ],
+    darrerEsco:{parti:'PSOE',valor:2594.5},
+    aPunt:{parti:'PP',valor:2507.3,votesFalta:523},
+    municipis:[
+      {nom:'Alaior',         meses:10,mesasEscr:10,part:'63,20%',vots:{PSOE:1105,PP:2032,'MÉS':556,UP:270,Cs:31,VOX:232,PLIE:9}},
+      {nom:'Ciutadella',     meses:32,mesasEscr:32,part:'35,65%',vots:{PSOE:2498,PP:4405,'MÉS':2453,UP:714,Cs:247,VOX:791,PLIE:85}},
+      {nom:'Ferreries',      meses:6, mesasEscr:6, part:'64,98%',vots:{PSOE:597,PP:1082,'MÉS':537,UP:131,Cs:22,VOX:133,PLIE:7}},
+      {nom:'Maó',            meses:32,mesasEscr:30,part:'49,12%',vots:{PSOE:3604,PP:4285,'MÉS':1533,UP:839,Cs:158,VOX:913,PLIE:39}},
+      {nom:'es Mercadal',    meses:5, mesasEscr:3, part:'—',     vots:{PSOE:609,PP:620,'MÉS':455,UP:119,Cs:9,VOX:186,PLIE:3}},
+      {nom:'Sant Lluís',     meses:9, mesasEscr:4, part:'11,54%',vots:{PSOE:805,PP:993,'MÉS':352,UP:239,Cs:39,VOX:192,PLIE:8}},
+      {nom:'es Castell',     meses:9, mesasEscr:0, part:'0%',    vots:{PSOE:929,PP:1213,'MÉS':436,UP:291,Cs:43,VOX:296,PLIE:11}},
+      {nom:'es Migjorn Gran',meses:2, mesasEscr:2, part:'—',     vots:{PSOE:231,PP:414,'MÉS':133,UP:31,Cs:1,VOX:29,PLIE:3}},
+    ]
+  },
+  mao:{label:"Ajuntament de Maó",totalSeats:21,totalMeses:32,mesasEscrutades:32,participation:'51,03%',cens:21696,
+    partits:[
+      {nom:'PSOE',    complet:'Partido Socialista',color:C.PSOE,       vots:4277,escons:8},
+      {nom:'PP',      complet:'Partido Popular',   color:C.PP,         vots:4195,escons:8},
+      {nom:'ARA MAÓ', complet:'Ara Maó',           color:C['ARA MAÓ'], vots:2061,escons:4},
+      {nom:'VOX',     complet:'Vox',               color:C.VOX,        vots:771, escons:1},
+      {nom:'Cs',      complet:'Ciudadanos',        color:C.Cs,         vots:197, escons:0},
+    ]},
+  ciutadella:{label:"Ajuntament de Ciutadella",totalSeats:21,totalMeses:32,mesasEscrutades:32,participation:'37,79%',cens:23639,
+    partits:[
+      {nom:'PP',          complet:'Partido Popular',         color:C.PP,             vots:4142,escons:9},
+      {nom:'PSOE',        complet:'Partido Socialista',      color:C.PSOE,           vots:2708,escons:5},
+      {nom:'PSM',         complet:'PSM-Entesa Nacionalista', color:C.PSM,            vots:2484,escons:5},
+      {nom:'C. ENDAVANT', complet:'Ciutadella Endavant',     color:C['C. ENDAVANT'], vots:847, escons:1},
+      {nom:'VOX',         complet:'Vox',                     color:C.VOX,            vots:736, escons:1},
+      {nom:'Cs',          complet:'Ciudadanos',              color:C.Cs,             vots:348, escons:0},
+      {nom:'PLIE',        complet:'PLIE',                    color:C.PLIE,           vots:80,  escons:0},
+    ]},
+  alaior:{label:"Ajuntament d'Alaior",totalSeats:13,totalMeses:10,mesasEscrutades:9,participation:'61,11%',cens:7271,
+    partits:[
+      {nom:'PP',      complet:'Partido Popular',    color:C.PP,      vots:2209,escons:8},
+      {nom:'PSOE',    complet:'Partido Socialista', color:C.PSOE,    vots:834, escons:3},
+      {nom:'AVANCEM', complet:'Avancem (MÉS+UP)',   color:C.AVANCEM, vots:782, escons:2},
+    ]},
+  ferreries:{label:"Ajuntament de Ferreries",totalSeats:11,totalMeses:6,mesasEscrutades:6,participation:'64,45%',cens:3935,
+    partits:[
+      {nom:'PP',     complet:'Partido Popular',      color:C.PP,     vots:1377,escons:6},
+      {nom:'ENTESA', complet:'Entesa per Ferreries', color:C.ENTESA, vots:623, escons:3},
+      {nom:'PSOE',   complet:'Partido Socialista',   color:C.PSOE,   vots:569, escons:2},
+    ]},
+  mercadal:{label:"Ajuntament d'es Mercadal",totalSeats:13,totalMeses:5,mesasEscrutades:3,participation:'33,50%',cens:4105,
+    partits:[
+      {nom:'PSOE',   complet:'Partido Socialista',      color:C.PSOE,   vots:726,escons:5},
+      {nom:'ENTESA', complet:'Entesa per es Mercadal',  color:C.ENTESA, vots:699,escons:4},
+      {nom:'PP',     complet:'Partido Popular',         color:C.PP,     vots:630,escons:4},
+    ]},
+  santlluis:{label:"Ajuntament de Sant Lluís",totalSeats:13,totalMeses:9,mesasEscrutades:9,participation:'47,50%',cens:5343,
+    partits:[
+      {nom:'PP',       complet:'Partido Popular',   color:C.PP,       vots:1131,escons:6},
+      {nom:'PSOE',     complet:'Partido Socialista',color:C.PSOE,     vots:694, escons:3},
+      {nom:'VOLEM',    complet:'Volem Sant Lluís',  color:C.VOLEM,    vots:577, escons:3},
+      {nom:'XBALEARS', complet:'Xbalears',          color:C.XBALEARS, vots:280, escons:1},
+    ]},
+  escastell:{label:"Ajuntament d'es Castell",totalSeats:13,totalMeses:9,mesasEscrutades:9,participation:'55,70%',cens:5851,
+    partits:[
+      {nom:'PP',       complet:'Partido Popular',   color:C.PP,       vots:1599,escons:7},
+      {nom:'PSOE',     complet:'Partido Socialista',color:C.PSOE,     vots:837, escons:3},
+      {nom:'SOM',      complet:'Som es Castell',    color:C.SOM,      vots:602, escons:2},
+      {nom:'IPEC',     complet:'IPEC',              color:C.IPEC,     vots:279, escons:1},
+      {nom:'XBALEARS', complet:'Xbalears',          color:C.XBALEARS, vots:64,  escons:0},
+    ]},
+  migjorn:{label:"Ajuntament d'es Migjorn Gran",totalSeats:11,totalMeses:2,mesasEscrutades:2,participation:'76,09%',cens:1221,
+    partits:[
+      {nom:'PP',   complet:'Partido Popular',    color:C.PP,   vots:585,escons:7},
+      {nom:'PSOE', complet:'Partido Socialista', color:C.PSOE, vots:299,escons:4},
+    ]}
+};
+
+// ── HISTORIC ────────────────────────────────────────────────
+const HIST_VOTES = {
+  cime:      {PP:15368,PSOE:10547,'MÉS':6772,UP:2388,VOX:2420,Cs:520,PLIE:169},
+  parlament: {PP:15044,PSOE:10378,'MÉS':6455,UP:2634,VOX:2772,Cs:550,PLIE:165},
+  mao:       {PSOE:4277,PP:4195,'ARA MAÓ':2061,VOX:771,Cs:197},
+  ciutadella:{PP:4142,PSOE:2708,PSM:2484,'C. ENDAVANT':847,VOX:736,Cs:348,PLIE:80},
+  alaior:    {PP:2209,PSOE:834,AVANCEM:782},
+  ferreries: {PP:1377,ENTESA:623,PSOE:569},
+  mercadal:  {PSOE:726,ENTESA:699,PP:630},
+  santlluis: {PP:1131,PSOE:694,VOLEM:577,XBALEARS:280},
+  escastell: {PP:1599,PSOE:837,SOM:602,IPEC:279,XBALEARS:64},
+  migjorn:   {PP:585,PSOE:299}
+};
+const HIST_SEATS = {
+  cime:      {PP:6,PSOE:4,'MÉS':2,VOX:1,UP:0,Cs:0,PLIE:0},
+  parlament: {PP:5,PSOE:4,'MÉS':2,UP:1,VOX:1,Cs:0,PLIE:0},
+  mao:       {PSOE:8,PP:8,'ARA MAÓ':4,VOX:1,Cs:0},
+  ciutadella:{PP:9,PSOE:5,PSM:5,'C. ENDAVANT':1,VOX:1,Cs:0,PLIE:0},
+  alaior:    {PP:8,PSOE:3,AVANCEM:2},
+  ferreries: {PP:6,ENTESA:3,PSOE:2},
+  mercadal:  {PSOE:5,ENTESA:4,PP:4},
+  santlluis: {PP:6,PSOE:3,VOLEM:3,XBALEARS:1},
+  escastell: {PP:7,PSOE:3,SOM:2,IPEC:1,XBALEARS:0},
+  migjorn:   {PP:7,PSOE:4}
+};
+
+// ── HELPERS ─────────────────────────────────────────────────
+const fN = n => Math.round(n).toLocaleString('ca-ES');
+const pct = (v,t) => t>0 ? ((v/t)*100).toFixed(1) : '0.0';
+const totV = ps => ps.reduce((s,p)=>s+p.vots,0);
+const scrutPct = d => d.totalMeses>0 ? Math.round(d.mesasEscrutades/d.totalMeses*100) : 0;
+
+function winner(partits) {
+  return partits.reduce((a,b)=>a.vots>b.vots?a:b);
+}
+
+function trendV(nom, hist, cur) {
+  const h=hist[nom];
+  if(h===undefined) return `<span class="trend t-new">NOU</span>`;
+  const d=cur-h;
+  if(d>0)  return `<span class="trend t-up">▲+${fN(d)}</span>`;
+  if(d<0)  return `<span class="trend t-dn">▼${fN(d)}</span>`;
+  return `<span class="trend t-eq">=</span>`;
+}
+function trendS(nom, histS, cur) {
+  if(!histS || histS[nom]===undefined) return '';
+  const d=cur-histS[nom];
+  if(d>0)  return `<span class="trend t-up" style="font-size:.58rem">▲${d}</span>`;
+  if(d<0)  return `<span class="trend t-dn" style="font-size:.58rem">▼${Math.abs(d)}</span>`;
+  return `<span class="trend t-eq" style="font-size:.58rem">=</span>`;
+}
+
+// ── WINNERS GRID ────────────────────────────────────────────
+const INST_LABELS = {
+  cime:'CIM',parlament:'Parl.',mao:'Maó',ciutadella:'Ciutadella',
+  alaior:'Alaior',ferreries:'Ferreries',mercadal:'Mercadal',
+  santlluis:'Sant Lluís',escastell:'Es Castell',migjorn:'Migjorn'
+};
+
+function renderWinnersGrid(data) {
+  const el=document.getElementById('winners-grid');
+  if(!el) return;
+  const keys=['cime','parlament','mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'];
+  el.innerHTML=keys.map(k=>{
+    const d=data[k];
+    const w=winner(d.partits);
+    const total=totV(d.partits);
+    const p=pct(w.vots,total);
+    const sp=scrutPct(d);
+    const incomplete=sp<100?`<span style="font-size:.55rem;color:rgba(255,255,255,.28);margin-left:3px">(${sp}%)</span>`:'';
+    return `<div class="winner-chip" onclick="switchTab('${k}')" style="cursor:pointer" title="${d.label}">
+      <span class="winner-chip-inst">${INST_LABELS[k]}</span>
+      <span class="winner-chip-dot" style="background:${w.color}"></span>
+      <span class="winner-chip-name">${w.nom}</span>
+      <span class="winner-chip-pct">${p}%${incomplete}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── SCRUTINY CARD HTML ───────────────────────────────────────
+function scrutCardHTML(data) {
+  const sp=scrutPct(data);
+  const statusCls=sp>=100?'done':'live';
+  const statusTxt=sp>=100?'✓ Escrutini complet':'Recompte en curs';
+  return `<div class="scrut-card anim">
+    <div>
+      <div class="scrut-pct">${sp}<small>%</small></div>
+      <div class="scrut-sub">Escrutat</div>
+    </div>
+    <div>
+      <div class="scrut-bar-label">Meses escrutades</div>
+      <div class="scrut-bar"><div class="scrut-bar-fill" style="width:${sp}%"></div></div>
+      <div class="scrut-bar-info">${data.mesasEscrutades} de ${data.totalMeses} meses · <span class="${statusCls}">${statusTxt}</span></div>
+    </div>
+    <div class="scrut-right">
+      <div class="scrut-right-val">${data.participation||'—'}</div>
+      <div class="scrut-right-label">Participació</div>
+      <div class="scrut-right-sub">Cens: ${fN(data.cens||0)}</div>
+    </div>
+  </div>`;
+}
+
+// ── ROWS ────────────────────────────────────────────────────
+function renderRows(partits, cid, histV, histS, elKey) {
+  const total=totV(partits);
+  const el=document.getElementById(cid);
+  if(!el) return;
+  el.innerHTML='';
+  partits.forEach((p,i)=>{
+    const p100=pct(p.vots,total);
+    const tv=histV?trendV(p.nom,histV,p.vots):'';
+    const ts=histS?trendS(p.nom,histS,p.escons):'';
+    const row=document.createElement('div');
+    row.className='table-row anim';
+    row.style.animationDelay=(i*.045)+'s';
+    row.innerHTML=`
+      <div class="party-cell">
+        <div class="party-swatch" style="background:${p.color}"></div>
+        <div>
+          <div class="party-name">${p.nom} ${tv}</div>
+          <div class="party-full">${p.complet}</div>
+        </div>
+      </div>
+      <div class="votes-cell">${fN(p.vots)}</div>
+      <div class="pct-cell">${p100}%</div>
+      <div class="bar-cell"><div class="bar-wrap"><div class="bar-fill" style="background:${p.color};width:0" data-w="${p100}"></div></div></div>
+      <div class="seats-cell">
+        ${Array(p.escons).fill(0).map(()=>`<div class="seat" style="background:${p.color}"></div>`).join('')}
+        <span class="seats-num">${p.escons>0?p.escons:'—'}</span>${ts}
+      </div>`;
+    el.appendChild(row);
+  });
+  setTimeout(()=>{ el.querySelectorAll('.bar-fill').forEach(b=>{ b.style.width=b.dataset.w+'%'; }); },120);
+}
+
+// ── HEMICICLE ───────────────────────────────────────────────
+// Ideological order LEFT→RIGHT:
+//   Esquerra: PSOE, MÉS, UP, ARA MAÓ, ENTESA, AVANCEM, VOLEM, SOM, C. ENDAVANT, PSM
+//   Dreta:    PP, VOX, Cs, PLIE, IPEC, XBALEARS
+// Seats 0..N-1 are placed left→right across the semicircle (angle π→0)
+// All seats of the same party are contiguous.
+
+const IDEO_LEFT = ['PSOE','MÉS','UP','ARA MAÓ','ENTESA','AVANCEM','VOLEM','SOM','C. ENDAVANT','PSM'];
+const IDEO_RIGHT = ['PP','VOX','Cs','PLIE','IPEC','XBALEARS'];
+
+function drawHemi(svgId, partits, totalSeats) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  svg.innerHTML = '';
+  const cx = 120, cy = 128;
+
+  // 1. Sort partits: left-bloc first (in order), then right-bloc (reversed so PP is outermost right)
+  const leftPartits  = IDEO_LEFT.map(n => partits.find(p => p.nom === n)).filter(Boolean);
+  const rightPartits = IDEO_RIGHT.map(n => partits.find(p => p.nom === n)).filter(Boolean);
+  // unknowns go to centre
+  const known = [...IDEO_LEFT, ...IDEO_RIGHT];
+  const centrePartits = partits.filter(p => !known.includes(p.nom));
+  const ordered = [...leftPartits, ...centrePartits, ...rightPartits];
+
+  // 2. Build flat seat array in ideological order (left→right = index 0→N-1)
+  const seats = [];
+  ordered.forEach(p => { for (let i = 0; i < p.escons; i++) seats.push(p.color); });
+
+  const N = seats.length;
+  if (N === 0) return;
+
+  // 3. Assign each seat a position 0..N-1 mapped to angle π..0
+  //    Then distribute across 3 rings by filling from inside out,
+  //    keeping contiguous blocks together per ring.
+  //
+  //    Strategy: assign seats to rings in order, ring capacities sized proportionally.
+  //    Ring 0 (inner): ~30%, Ring 1 (mid): ~35%, Ring 2 (outer): ~35%
+  const ringRadii = [46, 62, 78];
+  const ringCaps  = [
+    Math.round(N * 0.30),
+    Math.round(N * 0.35),
+    N - Math.round(N * 0.30) - Math.round(N * 0.35)
+  ];
+
+  let seatIdx = 0;
+  ringCaps.forEach((cap, ri) => {
+    const r = ringRadii[ri];
+    for (let i = 0; i < cap && seatIdx < N; i++, seatIdx++) {
+      // Map seat position within this ring to angle
+      // seat global index seatIdx maps to angle: π - (seatIdx/(N-1))*π
+      const angle = Math.PI - (seatIdx / (N - 1)) * Math.PI;
+      const x = cx + r * Math.cos(angle);
+      const y = cy - r * Math.sin(angle);
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', x.toFixed(1));
+      c.setAttribute('cy', y.toFixed(1));
+      c.setAttribute('r', '5.2');
+      c.setAttribute('fill', seats[seatIdx]);
+      svg.appendChild(c);
+    }
+  });
+
+  // 4. Majority line at the centre (angle = π/2, i.e. top centre)
+  const majorityNeeded = Math.floor(totalSeats / 2) + 1;
+  const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  ln.setAttribute('x1', cx); ln.setAttribute('y1', cy - 30);
+  ln.setAttribute('x2', cx); ln.setAttribute('y2', cy - 90);
+  ln.setAttribute('stroke', 'rgba(0,0,0,.22)');
+  ln.setAttribute('stroke-dasharray', '4,3');
+  ln.setAttribute('stroke-width', '1.5');
+  svg.appendChild(ln);
+
+  // Labels above the line
+  const lbl1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  lbl1.setAttribute('x', cx + 5); lbl1.setAttribute('y', cy - 76);
+  lbl1.setAttribute('fill', 'rgba(0,0,0,.3)'); lbl1.setAttribute('font-size', '7.5');
+  lbl1.setAttribute('font-family', 'Helvetica,Arial,sans-serif');
+  lbl1.setAttribute('font-weight', '600');
+  lbl1.textContent = 'majoria';
+  svg.appendChild(lbl1);
+
+  const lbl2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  lbl2.setAttribute('x', cx + 5); lbl2.setAttribute('y', cy - 66);
+  lbl2.setAttribute('fill', 'rgba(0,0,0,.22)'); lbl2.setAttribute('font-size', '7');
+  lbl2.setAttribute('font-family', 'Helvetica,Arial,sans-serif');
+  lbl2.textContent = majorityNeeded + ' escons';
+  svg.appendChild(lbl2);
+}
+
+function drawLegend(cid, partits) {
+  const el=document.getElementById(cid);
+  if(!el) return;
+  el.innerHTML='';
+  partits.filter(p=>p.escons>0).forEach(p=>{
+    el.innerHTML+=`<div class="hemi-legend-item"><div style="width:7px;height:7px;background:${p.color};border-radius:1px;flex-shrink:0"></div>${p.nom} (${p.escons})</div>`;
+  });
+}
+
+// ── MUNI DESGLOSSAT TABLE ───────────────────────────────────
+function renderMuniTable(municipis, keys, cid) {
+  const el=document.getElementById(cid);
+  if(!el||!municipis) return;
+  let html=`<div class="results-card anim"><div class="results-card-header">
+    <span class="results-card-title">Resultats per municipi</span>
+    <span class="results-card-meta">Vots i % per candidatura</span>
+  </div><div class="muni-table-wrap"><table class="muni-table"><thead><tr>
+    <th>Municipi</th><th class="scrut-th">Escrutat</th><th>Part.</th>`;
+  keys.forEach(k=>{ html+=`<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
+  html+=`</tr></thead><tbody>`;
+  municipis.forEach((m,ri)=>{
+    const tot=Object.values(m.vots).reduce((a,b)=>a+b,0);
+    const w=Object.entries(m.vots).sort((a,b)=>b[1]-a[1])[0];
+    const sp=m.meses>0?Math.round(m.mesasEscr/m.meses*100):0;
+    html+=`<tr><td>
+      <span style="display:inline-block;width:7px;height:7px;background:${C[w[0]]||'#aaa'};border-radius:50%;margin-right:6px;vertical-align:middle"></span>${m.nom}
+    </td><td style="text-align:center">
+      <div class="scrut-mini" style="color:${sp>=100?'var(--up)':'var(--accent2)'}">${sp}%</div>
+      <div class="scrut-mini-bar"><div class="scrut-mini-fill" style="width:${sp}%"></div></div>
+      <div style="font-size:.58rem;color:var(--muted)">${m.mesasEscr}/${m.meses}</div>
+    </td><td style="color:var(--muted);font-size:.68rem">${m.part}</td>`;
+    keys.forEach(k=>{
+      const v=m.vots[k]||0;
+      const p=tot>0?((v/tot)*100).toFixed(1):'0.0';
+      const isW=w[0]===k;
+      html+=`<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">${fN(v)}<br><span style="font-size:.6rem;color:var(--muted)">${p}%</span></td>`;
+    });
+    html+=`</tr>`;
+  });
+  // totals
+  const tots={};
+  keys.forEach(k=>{ tots[k]=municipis.reduce((s,m)=>s+(m.vots[k]||0),0); });
+  const gt=Object.values(tots).reduce((a,b)=>a+b,0);
+  const tM=municipis.reduce((s,m)=>s+(m.meses||0),0);
+  const tE=municipis.reduce((s,m)=>s+(m.mesasEscr||0),0);
+  const spT=tM>0?Math.round(tE/tM*100):0;
+  html+=`<tr class="total-row"><td>TOTAL MENORCA</td>
+    <td style="text-align:center;font-size:.68rem">${spT}%<br><span style="opacity:.5;font-size:.6rem">${tE}/${tM}</span></td>
+    <td style="opacity:.4">—</td>`;
+  keys.forEach(k=>{
+    const v=tots[k], p=gt>0?((v/gt)*100).toFixed(1):'0.0';
+    html+=`<td>${fN(v)}<br><span style="font-size:.6rem;opacity:.5">${p}%</span></td>`;
+  });
+  html+=`</tr></tbody></table></div></div>`;
+  el.innerHTML=html;
+}
+
+// ── SUPRAMUNICIPAL PANEL ─────────────────────────────────────
+function renderSupraPanel(key, data) {
+  const el=document.getElementById('panel-'+key);
+  if(!el) return;
+  el.innerHTML=`
+    <div class="section-kicker">Resultats · Illa de Menorca</div>
+    <div class="section-heading">${data.label}</div>
+    ${scrutCardHTML(data)}
+    <div class="hemicicle-row">
+      <div class="hemi-card anim">
+        <div class="hemi-label">Distribució d'escons</div>
+        <div class="hemi-title">${data.totalSeats} escons · D'Hondt</div>
+        <svg class="hemi" viewBox="0 0 240 136" id="hemi-${key}"></svg>
+        <div class="hemi-legend" id="leg-${key}"></div>
+      </div>
+      <div class="hemi-card anim" id="right-card-${key}"></div>
+    </div>
+    <div class="results-card anim">
+      <div class="results-card-header">
+        <span class="results-card-title">Resultats per candidatura</span>
+        <span class="results-card-meta">${data.totalSeats} escons · ▲▼ vs. 28M 2023</span>
+      </div>
+      <div class="table-head"><div>Candidatura</div><div>Vots</div><div>%</div><div>Representació</div><div>Escons</div></div>
+      <div id="rows-${key}"></div>
+    </div>
+    <div class="section-kicker" style="margin-bottom:5px">Desglossat per municipi</div>
+    <div id="muni-${key}"></div>`;
+
+  renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
+  drawHemi('hemi-'+key,data.partits,data.totalSeats);
+  drawLegend('leg-'+key,data.partits);
+  renderRightCard(key, data, HIST_SEATS[key]);
+  renderMuniTable(data.municipis,data.partits.map(p=>p.nom),'muni-'+key);
+}
+
+// ── RIGHT CARD: Repartiment + Escrutini crític ───────────────
+function renderRightCard(key, data, histSeats) {
+  const el = document.getElementById('right-card-' + key);
+  if (!el) return;
+  const total = data.totalSeats;
+  const ambEscons = data.partits.filter(p => p.escons > 0);
+
+  // Secció 1: Repartiment
+  let html = `
+    <div class="hemi-label">Repartiment</div>
+    <div class="hemi-title" style="margin-bottom:12px">Escons per candidatura</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">`;
+
+  ambEscons.forEach(p => {
+    const hS   = histSeats && histSeats[p.nom] !== undefined ? histSeats[p.nom] : null;
+    const diff = hS !== null ? p.escons - hS : null;
+    const ds   = diff === null ? ''
+      : diff > 0  ? `<span class="trend t-up" style="font-size:.55rem">▲${diff}</span>`
+      : diff < 0  ? `<span class="trend t-dn" style="font-size:.55rem">▼${Math.abs(diff)}</span>`
+      :              `<span class="trend t-eq" style="font-size:.55rem">=</span>`;
+    const w = (p.escons / total * 100).toFixed(0);
+    html += `
+      <div class="seats-bar-item">
+        <div class="seats-bar-top">
+          <span class="seats-bar-name" style="display:flex;align-items:center;gap:5px">
+            <span style="width:8px;height:8px;background:${p.color};border-radius:1px;flex-shrink:0;display:inline-block"></span>
+            ${p.nom}
+          </span>
+          <span class="seats-bar-val" style="color:${p.color}">${p.escons} ${ds}</span>
+        </div>
+        <div class="seats-bar-track">
+          <div class="seats-bar-fill" style="background:${p.color};width:${w}%"></div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
+  // Divisor
+  html += `<div style="border-top:1.5px solid var(--border);margin-bottom:12px"></div>`;
+
+  // Secció 2: Escrutini crític
+  html += `
+    <div class="hemi-label">Escrutini crític</div>
+    <div class="hemi-title" style="margin-bottom:10px">Darrer escó i marge</div>`;
+
+  if (data.darrerEsco) {
+    const dp = data.partits.find(p => p.nom === data.darrerEsco.parti);
+    const ap = data.partits.find(p => p.nom === data.aPunt.parti);
+    html += `
+      <div class="critical-row">
+        <div class="critical-label">Últim escó assignat</div>
+        <div class="critical-val" style="color:${dp ? dp.color : 'inherit'}">
+          ${data.darrerEsco.parti}
+          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(data.darrerEsco.valor)} pts</span>
+        </div>
+      </div>
+      <div class="critical-row">
+        <div class="critical-label">A punt d'entrar</div>
+        <div class="critical-val" style="color:${ap ? ap.color : 'inherit'}">
+          ${data.aPunt.parti}
+          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(data.aPunt.valor)} pts</span>
+        </div>
+        <div class="critical-sub">Falten <strong style="color:var(--ink)">${fN(data.aPunt.votesFalta)}</strong> vots per al proper escó</div>
+      </div>`;
+  } else {
+    // Municipis sense dades precalculades: mostrem resum útil
+    const totalVots = totV(data.partits);
+    const llindar   = Math.round(totalVots * 0.05);
+    html += `
+      <div class="critical-row">
+        <div class="critical-label">Llindar entrada (5%)</div>
+        <div class="critical-val">${fN(llindar)} vots</div>
+      </div>
+      <div class="critical-row">
+        <div class="critical-label">Candidatures amb representació</div>
+        <div class="critical-val">${ambEscons.length} <span style="font-size:.72rem;color:var(--muted);font-weight:400">de ${data.partits.length}</span></div>
+      </div>
+      <div class="critical-row">
+        <div class="critical-label">Majoria necessària</div>
+        <div class="critical-val">${Math.floor(total / 2) + 1} regidors</div>
+      </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── MUNICIPAL PANEL ──────────────────────────────────────────
+function renderMuniPanel(key, data) {
+  const el=document.getElementById('panel-'+key);
+  if(!el) return;
+  el.innerHTML=`
+    <div class="section-kicker">Ajuntament · Resultats</div>
+    <div class="section-heading">${data.label}</div>
+    ${scrutCardHTML(data)}
+    <div class="hemicicle-row">
+      <div class="hemi-card anim">
+        <div class="hemi-label">Distribució de regidors</div>
+        <div class="hemi-title">${data.totalSeats} regidors · D'Hondt</div>
+        <svg class="hemi" viewBox="0 0 240 136" id="hemi-${key}"></svg>
+        <div class="hemi-legend" id="leg-${key}"></div>
+      </div>
+      <div class="hemi-card anim" id="right-card-${key}"></div>
+    </div>
+    <div class="results-card anim">
+      <div class="results-card-header">
+        <span class="results-card-title">Resultats per candidatura</span>
+        <span class="results-card-meta">${data.totalSeats} regidors · ▲▼ vs. 28M 2023</span>
+      </div>
+      <div class="table-head"><div>Candidatura</div><div>Vots</div><div>%</div><div>Representació</div><div>Regidors</div></div>
+      <div id="rows-${key}"></div>
+    </div>`;
+
+  renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
+  drawHemi('hemi-'+key,data.partits,data.totalSeats);
+  drawLegend('leg-'+key,data.partits);
+  renderRightCard(key, data, HIST_SEATS[key]);
+}
+
+// ── TAB SWITCH ───────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const btn=[...document.querySelectorAll('.tab-btn')].find(b=>b.getAttribute('onclick').includes("'"+id+"'"));
+  if(btn) btn.classList.add('active');
+  const panel=document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── CLOCK & COUNTDOWN ────────────────────────────────────────
+function updateClock() {
+  const n=new Date(), t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  ['clock-val','footer-time'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=t; });
+}
+let cdSecs=REFRESH_SECONDS;
+function startCountdown() {
+  setInterval(()=>{
+    cdSecs--;
+    if(cdSecs<0){ cdSecs=REFRESH_SECONDS; loadData().then(renderAll); }
+    const m=Math.floor(cdSecs/60),s=cdSecs%60;
+    const e=document.getElementById('countdown-val');
+    if(e) e.textContent=m+':'+String(s).padStart(2,'0');
+  },1000);
+}
+
+// ── DATA LOAD ────────────────────────────────────────────────
+async function loadData() {
+  if(!JSON_URL) return CURRENT;
+  try { const r=await fetch(JSON_URL); return await r.json(); }
+  catch(e) { console.warn('Using demo data',e); return CURRENT; }
+}
+
+async function renderAll(data) {
+  renderSupraPanel('cime', data.cime);
+  renderSupraPanel('parlament', data.parlament);
+  ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
+    renderMuniPanel(k, data[k]);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  updateClock(); setInterval(updateClock,30000);
+  const data=await loadData();
+  await renderAll(data);
+  startCountdown();
+});
+</script>
+</body>
+</html>
