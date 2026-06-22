@@ -315,6 +315,95 @@ const C = {
   XBALEARS:      '#4a6a8a',  // blau gris
 };
 
+
+// ── PARTY CONFIG ─────────────────────────────────────────────
+// Per afegir una candidatura nova:
+// 1. Afegeix-la a l'objecte C amb el color desitjat
+// 2. Afegeix-la a IDEO_ORDER de l'elecció corresponent
+// 3. Si substitueix una candidatura anterior, afegeix el mapatge a HIST_MAP
+const PARTY_CONFIG = {
+  // Ordre ideològic esq→dret per elecció
+  IDEO_ORDER: {
+    cime:      ['PSOE','MÉS','UP','VOX','Cs','PLIE','PP'],
+    parlament: ['PSOE','UP','MÉS','VOX','Cs','PLIE','PP'],
+    mao:       ['PSOE','ARA MAÓ','VOX','Cs','PP'],
+    ciutadella:['PSOE','PSM','C. ENDAVANT','VOX','Cs','PLIE','PP'],
+    alaior:    ['PSOE','AVANCEM','VOX','PP'],
+    ferreries: ['PSOE','ENTESA','PP'],
+    mercadal:  ['PSOE','ENTESA','PP'],
+    santlluis: ['PSOE','VOLEM','XBALEARS','PP'],
+    escastell: ['PSOE','SOM','IPEC','XBALEARS','PP'],
+    migjorn:   ['PSOE','PP'],
+  },
+  // Mapatge històric: candidatura nova → candidatura anterior
+  // (per comparar amb 28M 2023 encara que el nom hagi canviat)
+  HIST_MAP: {
+    // Exemple: 'NOM NOU': 'NOM ANTIC'
+  }
+};
+
+// Assigna colors als partits provinents del JSON
+function assignColors(partits) {
+  partits.forEach(p => {
+    if (!p.color) p.color = C[p.nom] || '#888';
+  });
+  return partits;
+}
+
+// Calcula D'Hondt complet al navegador (per a escó crític)
+function calcHondt(partits, totalSeats, llindar) {
+  const umbral = llindar || 0;
+  const escons = {};
+  const elegibles = partits.filter(p => p.vots >= umbral).map(p => p.nom);
+  elegibles.forEach(n => escons[n] = 0);
+  
+  const quocients = []; // {parti, valor, escoNum}
+  
+  for (let i = 0; i < totalSeats; i++) {
+    let maxVal = -1, guanyador = null;
+    elegibles.forEach(n => {
+      const p = partits.find(x => x.nom === n);
+      const val = p.vots / (escons[n] + 1);
+      if (val > maxVal) { maxVal = val; guanyador = n; }
+    });
+    if (guanyador) {
+      escons[guanyador]++;
+      quocients.push({parti: guanyador, valor: maxVal, escoNum: i + 1});
+    }
+  }
+  
+  // Darrer escó i a punt d'entrar
+  const darrer = quocients[quocients.length - 1];
+  
+  // A punt: el millor quocient NO assignat
+  let maxNextVal = -1, nextParti = null;
+  elegibles.forEach(n => {
+    const p = partits.find(x => x.nom === n);
+    const val = p.vots / (escons[n] + 1);
+    if (val > maxNextVal) { maxNextVal = val; nextParti = n; }
+  });
+  
+  // Marge en vots reals (no quocients)
+  // Per robar l'escó: nextParti necessita que vots_next/(escons_next+1) > vots_darrer/escons_darrer
+  // vots_next_necessaris = (vots_darrer/escons_darrer) * (escons_next+1) + 1 - vots_next_actual
+  let votesFalta = 0;
+  if (darrer && nextParti) {
+    const pDarrer = partits.find(x => x.nom === darrer.parti);
+    const pNext = partits.find(x => x.nom === nextParti);
+    if (pDarrer && pNext) {
+      const threshold = pDarrer.vots / escons[darrer.parti];
+      const needed = Math.ceil(threshold * (escons[nextParti] + 1)) - pNext.vots;
+      votesFalta = Math.max(0, needed);
+    }
+  }
+  
+  return {
+    escons,
+    darrerEsco: darrer ? {parti: darrer.parti, valor: darrer.valor} : null,
+    aPunt: nextParti ? {parti: nextParti, valor: maxNextVal, votesFalta} : null
+  };
+}
+
 // ── CURRENT DATA ────────────────────────────────────────────
 const CURRENT = {
   cime:{
@@ -562,94 +651,198 @@ function renderRows(partits, cid, histV, histS, elKey) {
   setTimeout(()=>{ el.querySelectorAll('.bar-fill').forEach(b=>{ b.style.width=b.dataset.w+'%'; }); },120);
 }
 
-// ── HEMICICLE ───────────────────────────────────────────────
-// Ideological order LEFT→RIGHT:
-//   Esquerra: PSOE, MÉS, UP, ARA MAÓ, ENTESA, AVANCEM, VOLEM, SOM, C. ENDAVANT, PSM
-//   Dreta:    PP, VOX, Cs, PLIE, IPEC, XBALEARS
-// Seats 0..N-1 are placed left→right across the semicircle (angle π→0)
-// All seats of the same party are contiguous.
+// ── HEMICICLE DOBLE ARC (ventall clàssic) ───────────────────
+// Sectors dibuixats amb polígons (no arcs SVG) per garantir
+// una forma de ventall/abanico perfecta.
 
-const IDEO_LEFT = ['PSOE','MÉS','UP','ARA MAÓ','ENTESA','AVANCEM','VOLEM','SOM','C. ENDAVANT','PSM'];
-const IDEO_RIGHT = ['PP','VOX','Cs','PLIE','IPEC','XBALEARS'];
+function getIdeoOrder(key, partits) {
+  const order = (PARTY_CONFIG.IDEO_ORDER || {})[key];
+  if (!order) return partits.map(p => p.nom);
+  return [...partits].sort((a, b) => {
+    let ia = order.indexOf(a.nom), ib = order.indexOf(b.nom);
+    if (ia < 0) ia = 999; if (ib < 0) ib = 999;
+    return ia - ib;
+  }).map(p => p.nom);
+}
 
-function drawHemi(svgId, partits, totalSeats) {
+function drawHemi(svgId, partits, totalSeats, elKey) {
   const svg = document.getElementById(svgId);
   if (!svg) return;
   svg.innerHTML = '';
-  const cx = 120, cy = 128;
 
-  // 1. Sort partits: left-bloc first (in order), then right-bloc (reversed so PP is outermost right)
-  const leftPartits  = IDEO_LEFT.map(n => partits.find(p => p.nom === n)).filter(Boolean);
-  const rightPartits = IDEO_RIGHT.map(n => partits.find(p => p.nom === n)).filter(Boolean);
-  // unknowns go to centre
-  const known = [...IDEO_LEFT, ...IDEO_RIGHT];
-  const centrePartits = partits.filter(p => !known.includes(p.nom));
-  const ordered = [...leftPartits, ...centrePartits, ...rightPartits];
+  const W = 400, H = 220;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const cx = W / 2, cy = H - 16;
 
-  // 2. Build flat seat array in ideological order (left→right = index 0→N-1)
-  const seats = [];
-  ordered.forEach(p => { for (let i = 0; i < p.escons; i++) seats.push(p.color); });
+  // Radis dels dos arcs
+  const O_R1 = 115, O_R2 = 178;   // arc exterior (2027): gruixut
+  const I_R1 = 48,  I_R2 = 105;   // arc interior (2023): gruixut
+  const SPREAD = 170;              // graus del ventall (170° de 180° possibles)
+  const START_DEG = 90 + SPREAD/2; // ~175°
+  const END_DEG = 90 - SPREAD/2;   // ~5°
+  const GAP = 1.5;                 // graus entre sectors
 
-  const N = seats.length;
-  if (N === 0) return;
+  const orderedNames = getIdeoOrder(elKey, partits);
+  const ordered = orderedNames.map(n => partits.find(p => p.nom === n)).filter(Boolean);
+  const hSeats = HIST_SEATS[elKey] || {};
 
-  // 3. Assign each seat a position 0..N-1 mapped to angle π..0
-  //    Then distribute across 3 rings by filling from inside out,
-  //    keeping contiguous blocks together per ring.
-  //
-  //    Strategy: assign seats to rings in order, ring capacities sized proportionally.
-  //    Ring 0 (inner): ~30%, Ring 1 (mid): ~35%, Ring 2 (outer): ~35%
-  const ringRadii = [46, 62, 78];
-  const ringCaps  = [
-    Math.round(N * 0.30),
-    Math.round(N * 0.35),
-    N - Math.round(N * 0.30) - Math.round(N * 0.35)
-  ];
+  // ── Polar → Cartesià ──
+  function xy(r, deg) {
+    const rad = deg * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy - r * Math.sin(rad)];
+  }
 
-  let seatIdx = 0;
-  ringCaps.forEach((cap, ri) => {
-    const r = ringRadii[ri];
-    for (let i = 0; i < cap && seatIdx < N; i++, seatIdx++) {
-      // Map seat position within this ring to angle
-      // seat global index seatIdx maps to angle: π - (seatIdx/(N-1))*π
-      const angle = Math.PI - (seatIdx / (N - 1)) * Math.PI;
-      const x = cx + r * Math.cos(angle);
-      const y = cy - r * Math.sin(angle);
-      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      c.setAttribute('cx', x.toFixed(1));
-      c.setAttribute('cy', y.toFixed(1));
-      c.setAttribute('r', '5.2');
-      c.setAttribute('fill', seats[seatIdx]);
-      svg.appendChild(c);
+  // ── Dibuixa sector com a polígon (fiable, sense artefactes) ──
+  function drawSector(r1, r2, fromDeg, toDeg, color, opacity) {
+    if (Math.abs(fromDeg - toDeg) < 0.3) return;
+    const pts = [];
+    const steps = Math.max(24, Math.round(Math.abs(fromDeg - toDeg) * 1.5));
+    // Arc exterior (fromDeg → toDeg)
+    for (let i = 0; i <= steps; i++) {
+      const d = fromDeg + (toDeg - fromDeg) * (i / steps);
+      const [x, y] = xy(r2, d);
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
     }
+    // Arc interior (toDeg → fromDeg, revers)
+    for (let i = steps; i >= 0; i--) {
+      const d = fromDeg + (toDeg - fromDeg) * (i / steps);
+      const [x, y] = xy(r1, d);
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', pts.join(' '));
+    poly.setAttribute('fill', color);
+    if (opacity < 1) poly.setAttribute('opacity', String(opacity));
+    poly.setAttribute('stroke', 'rgba(255,255,255,.5)');
+    poly.setAttribute('stroke-width', '1');
+    svg.appendChild(poly);
+  }
+
+  // ── Text centrat dins un sector ──
+  function sectorNum(r1, r2, fromDeg, toDeg, text, sizePx) {
+    const midDeg = (fromDeg + toDeg) / 2;
+    const midR = (r1 + r2) / 2;
+    const [tx, ty] = xy(midR, midDeg);
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', tx.toFixed(1));
+    t.setAttribute('y', (ty + sizePx * 0.36).toFixed(1));
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', sizePx);
+    t.setAttribute('font-weight', '800');
+    t.setAttribute('fill', '#fff');
+    t.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
+    t.textContent = text;
+    svg.appendChild(t);
+  }
+
+  // ── Dibuixa un arc complet (tots els sectors) ──
+  function renderArc(list, seatsFn, r1, r2, opacity) {
+    const total = list.reduce((s, p) => s + seatsFn(p), 0);
+    if (total === 0) return [];
+    const active = list.filter(p => seatsFn(p) > 0);
+    const nGaps = Math.max(0, active.length - 1);
+    const usable = SPREAD - GAP * nGaps;
+    let deg = START_DEG;
+    const secs = [];
+
+    active.forEach(p => {
+      const seats = seatsFn(p);
+      const sweep = (seats / total) * usable;
+      const endDeg = deg - sweep;
+      drawSector(r1, r2, deg, endDeg, p.color || '#888', opacity);
+
+      // Número dins el sector
+      const thickness = r2 - r1;
+      const arcLen = sweep * Math.PI / 180 * ((r1+r2)/2);
+      const maxSize = Math.min(thickness * 0.55, arcLen * 0.7);
+      const fontSize = Math.max(8, Math.min(22, Math.round(maxSize)));
+      if (seats > 0) sectorNum(r1, r2, deg, endDeg, seats, fontSize);
+
+      secs.push({nom: p.nom, color: p.color, from: deg, to: endDeg, seats});
+      deg = endDeg - GAP;
+    });
+    return secs;
+  }
+
+  // ── ARC INTERIOR (2023, semitransparent) ──
+  const histList = ordered.map(p => ({...p, escons: hSeats[p.nom] || 0}));
+  renderArc(histList, p => p.escons, I_R1, I_R2, 0.4);
+
+  // ── ARC EXTERIOR (2027) ──
+  const outerSecs = renderArc(ordered, p => p.escons, O_R1, O_R2, 1.0);
+
+  // ── LÍNIA DE MAJORIA ──
+  const majority = Math.floor(totalSeats / 2) + 1;
+  const totalCur = ordered.reduce((s, p) => s + p.escons, 0);
+
+  if (totalCur > 0 && outerSecs.length > 0) {
+    let cum = 0, majDeg = 90;
+    for (const sec of outerSecs) {
+      if (cum + sec.seats >= majority) {
+        const frac = (majority - cum) / sec.seats;
+        majDeg = sec.from - (sec.from - sec.to) * frac;
+        break;
+      }
+      cum += sec.seats;
+    }
+    const [x1, y1] = xy(I_R1 - 8, majDeg);
+    const [x2, y2] = xy(O_R2 + 8, majDeg);
+    const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    ln.setAttribute('x1',x1.toFixed(1)); ln.setAttribute('y1',y1.toFixed(1));
+    ln.setAttribute('x2',x2.toFixed(1)); ln.setAttribute('y2',y2.toFixed(1));
+    ln.setAttribute('stroke','rgba(0,0,0,.3)');
+    ln.setAttribute('stroke-dasharray','6,4');
+    ln.setAttribute('stroke-width','1.8');
+    svg.appendChild(ln);
+
+    const [lx, ly] = xy(O_R2 + 16, majDeg);
+    const anch = majDeg > 90 ? 'end' : 'start';
+    [{t:'majoria',dy:-3,sz:8,fw:'700',op:.35},{t:majority+' escons',dy:7,sz:7,fw:'500',op:.25}].forEach(l => {
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',lx.toFixed(1)); t.setAttribute('y',(ly+l.dy).toFixed(1));
+      t.setAttribute('text-anchor',anch); t.setAttribute('font-size',l.sz);
+      t.setAttribute('font-weight',l.fw); t.setAttribute('fill',`rgba(0,0,0,${l.op})`);
+      t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+      t.textContent = l.t; svg.appendChild(t);
+    });
+  }
+
+  // ── ETIQUETES "2027" i "2023" ──
+  [{r1:O_R1,r2:O_R2,txt:'2027',sz:10,fw:'700',op:.45},
+   {r1:I_R1,r2:I_R2,txt:'2023',sz:8,fw:'600',op:.3}].forEach(l => {
+    const midR = (l.r1 + l.r2) / 2;
+    const [lx, ly] = xy(midR, START_DEG + 4);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',lx.toFixed(1)); t.setAttribute('y',ly.toFixed(1));
+    t.setAttribute('text-anchor','end'); t.setAttribute('font-size',l.sz);
+    t.setAttribute('font-weight',l.fw); t.setAttribute('fill',`rgba(0,0,0,${l.op})`);
+    t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+    t.textContent = l.txt; svg.appendChild(t);
   });
 
-  // 4. Majority line at the centre (angle = π/2, i.e. top centre)
-  const majorityNeeded = Math.floor(totalSeats / 2) + 1;
-  const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  ln.setAttribute('x1', cx); ln.setAttribute('y1', cy - 30);
-  ln.setAttribute('x2', cx); ln.setAttribute('y2', cy - 90);
-  ln.setAttribute('stroke', 'rgba(0,0,0,.22)');
-  ln.setAttribute('stroke-dasharray', '4,3');
-  ln.setAttribute('stroke-width', '1.5');
-  svg.appendChild(ln);
-
-  // Labels above the line
-  const lbl1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  lbl1.setAttribute('x', cx + 5); lbl1.setAttribute('y', cy - 76);
-  lbl1.setAttribute('fill', 'rgba(0,0,0,.3)'); lbl1.setAttribute('font-size', '7.5');
-  lbl1.setAttribute('font-family', 'Helvetica,Arial,sans-serif');
-  lbl1.setAttribute('font-weight', '600');
-  lbl1.textContent = 'majoria';
-  svg.appendChild(lbl1);
-
-  const lbl2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  lbl2.setAttribute('x', cx + 5); lbl2.setAttribute('y', cy - 66);
-  lbl2.setAttribute('fill', 'rgba(0,0,0,.22)'); lbl2.setAttribute('font-size', '7');
-  lbl2.setAttribute('font-family', 'Helvetica,Arial,sans-serif');
-  lbl2.textContent = majorityNeeded + ' escons';
-  svg.appendChild(lbl2);
+  // ── LLEGENDA partits a sota ──
+  const active = ordered.filter(p => p.escons > 0);
+  if (active.length > 0) {
+    const totalW = active.length * 72;
+    const startX = Math.max(10, (W - totalW) / 2);
+    active.forEach((p, i) => {
+      const lx = startX + i * 72;
+      const ly = H - 2;
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x',lx.toFixed(0)); r.setAttribute('y',(ly-8).toFixed(0));
+      r.setAttribute('width','9'); r.setAttribute('height','9');
+      r.setAttribute('rx','2'); r.setAttribute('fill',p.color||'#888');
+      svg.appendChild(r);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',(lx+13).toFixed(0)); t.setAttribute('y',(ly).toFixed(0));
+      t.setAttribute('font-size','7.5'); t.setAttribute('font-weight','600');
+      t.setAttribute('fill','var(--ink)');
+      t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+      t.textContent = p.nom+' ('+p.escons+')'; svg.appendChild(t);
+    });
+  }
 }
+
 
 function drawLegend(cid, partits) {
   const el=document.getElementById(cid);
@@ -720,7 +913,7 @@ function renderSupraPanel(key, data) {
       <div class="hemi-card anim">
         <div class="hemi-label">Distribució d'escons</div>
         <div class="hemi-title">${data.totalSeats} escons · D'Hondt</div>
-        <svg class="hemi" viewBox="0 0 240 136" id="hemi-${key}"></svg>
+        <svg class="hemi" viewBox="0 0 400 220" id="hemi-${key}"></svg>
         <div class="hemi-legend" id="leg-${key}"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
@@ -737,7 +930,7 @@ function renderSupraPanel(key, data) {
     <div id="muni-${key}"></div>`;
 
   renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
-  drawHemi('hemi-'+key,data.partits,data.totalSeats);
+  drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
   drawLegend('leg-'+key,data.partits);
   renderRightCard(key, data, HIST_SEATS[key]);
   renderMuniTable(data.municipis,data.partits.map(p=>p.nom),'muni-'+key);
@@ -750,6 +943,14 @@ function renderRightCard(key, data, histSeats) {
   const total = data.totalSeats;
   const ambEscons = data.partits.filter(p => p.escons > 0);
 
+  // Calcula D'Hondt al navegador per obtenir darrerEsco/aPunt
+  const totalVots = totV(data.partits);
+  const llindar = Math.round(totalVots * 0.05);
+  let hondt = null;
+  if (totalVots > 0) {
+    hondt = calcHondt(data.partits, total, llindar);
+  }
+
   // Secció 1: Repartiment
   let html = `
     <div class="hemi-label">Repartiment</div>
@@ -758,7 +959,9 @@ function renderRightCard(key, data, histSeats) {
 
   ambEscons.forEach(p => {
     const hS   = histSeats && histSeats[p.nom] !== undefined ? histSeats[p.nom] : null;
-    const diff = hS !== null ? p.escons - hS : null;
+    const hMap = PARTY_CONFIG.HIST_MAP[p.nom];
+    const hSm  = hS !== null ? hS : (hMap && histSeats && histSeats[hMap] !== undefined ? histSeats[hMap] : null);
+    const diff = hSm !== null ? p.escons - hSm : null;
     const ds   = diff === null ? ''
       : diff > 0  ? `<span class="trend t-up" style="font-size:.55rem">▲${diff}</span>`
       : diff < 0  ? `<span class="trend t-dn" style="font-size:.55rem">▼${Math.abs(diff)}</span>`
@@ -783,46 +986,44 @@ function renderRightCard(key, data, histSeats) {
   // Divisor
   html += `<div style="border-top:1.5px solid var(--border);margin-bottom:12px"></div>`;
 
-  // Secció 2: Escrutini crític
+  // Secció 2: Escrutini crític — SEMPRE amb D'Hondt calculat
   html += `
     <div class="hemi-label">Escrutini crític</div>
     <div class="hemi-title" style="margin-bottom:10px">Darrer escó i marge</div>`;
 
-  if (data.darrerEsco) {
-    const dp = data.partits.find(p => p.nom === data.darrerEsco.parti);
-    const ap = data.partits.find(p => p.nom === data.aPunt.parti);
+  if (hondt && hondt.darrerEsco) {
+    const dp = data.partits.find(p => p.nom === hondt.darrerEsco.parti);
+    const ap = hondt.aPunt ? data.partits.find(p => p.nom === hondt.aPunt.parti) : null;
     html += `
       <div class="critical-row">
-        <div class="critical-label">Últim escó assignat</div>
+        <div class="critical-label">Últim escó assignat a</div>
         <div class="critical-val" style="color:${dp ? dp.color : 'inherit'}">
-          ${data.darrerEsco.parti}
-          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(data.darrerEsco.valor)} pts</span>
+          <span style="display:inline-block;width:10px;height:10px;background:${dp?dp.color:'#888'};border-radius:2px;margin-right:5px;vertical-align:middle"></span>
+          ${hondt.darrerEsco.parti}
+          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(hondt.darrerEsco.valor)} pts</span>
         </div>
-      </div>
+      </div>`;
+    if (ap) {
+      html += `
       <div class="critical-row">
-        <div class="critical-label">A punt d'entrar</div>
+        <div class="critical-label">A punt d'aconseguir-lo</div>
         <div class="critical-val" style="color:${ap ? ap.color : 'inherit'}">
-          ${data.aPunt.parti}
-          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(data.aPunt.valor)} pts</span>
+          <span style="display:inline-block;width:10px;height:10px;background:${ap?ap.color:'#888'};border-radius:2px;margin-right:5px;vertical-align:middle"></span>
+          ${hondt.aPunt.parti}
+          <span style="font-size:.72rem;color:var(--muted);font-weight:400;margin-left:4px">${fN(hondt.aPunt.valor)} pts</span>
         </div>
-        <div class="critical-sub">Falten <strong style="color:var(--ink)">${fN(data.aPunt.votesFalta)}</strong> vots per al proper escó</div>
+        <div class="critical-sub">Marge: <strong style="color:var(--accent)">${fN(hondt.aPunt.votesFalta)}</strong> vots de diferència</div>
+      </div>`;
+    }
+    html += `
+      <div class="critical-row" style="margin-top:8px">
+        <div class="critical-label">Majoria necessària</div>
+        <div class="critical-val">${Math.floor(total / 2) + 1} escons</div>
       </div>`;
   } else {
-    // Municipis sense dades precalculades: mostrem resum útil
-    const totalVots = totV(data.partits);
-    const llindar   = Math.round(totalVots * 0.05);
     html += `
       <div class="critical-row">
-        <div class="critical-label">Llindar entrada (5%)</div>
-        <div class="critical-val">${fN(llindar)} vots</div>
-      </div>
-      <div class="critical-row">
-        <div class="critical-label">Candidatures amb representació</div>
-        <div class="critical-val">${ambEscons.length} <span style="font-size:.72rem;color:var(--muted);font-weight:400">de ${data.partits.length}</span></div>
-      </div>
-      <div class="critical-row">
-        <div class="critical-label">Majoria necessària</div>
-        <div class="critical-val">${Math.floor(total / 2) + 1} regidors</div>
+        <div class="critical-label" style="color:var(--muted)">Sense dades encara</div>
       </div>`;
   }
 
@@ -841,7 +1042,7 @@ function renderMuniPanel(key, data) {
       <div class="hemi-card anim">
         <div class="hemi-label">Distribució de regidors</div>
         <div class="hemi-title">${data.totalSeats} regidors · D'Hondt</div>
-        <svg class="hemi" viewBox="0 0 240 136" id="hemi-${key}"></svg>
+        <svg class="hemi" viewBox="0 0 400 220" id="hemi-${key}"></svg>
         <div class="hemi-legend" id="leg-${key}"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
@@ -856,7 +1057,7 @@ function renderMuniPanel(key, data) {
     </div>`;
 
   renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
-  drawHemi('hemi-'+key,data.partits,data.totalSeats);
+  drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
   drawLegend('leg-'+key,data.partits);
   renderRightCard(key, data, HIST_SEATS[key]);
 }
@@ -896,6 +1097,12 @@ async function loadData() {
 }
 
 async function renderAll(data) {
+  // Assigna colors a tots els partits del JSON
+  Object.keys(data).forEach(k => {
+    if (data[k] && data[k].partits) {
+      assignColors(data[k].partits);
+    }
+  });
   renderSupraPanel('cime', data.cime);
   renderSupraPanel('parlament', data.parlament);
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
