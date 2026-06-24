@@ -290,7 +290,7 @@ svg.hemi { width: 100%; overflow: visible; }
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-const JSON_URL = 'https://script.google.com/macros/s/AKfycbwHDlYluVuVI4be9D561rF3YfJkAuWL_aNvitVClU_ccLqeLfBGl9ni4PdcrEllo5DZbA/exec';
+const JSON_URL = 'https://script.google.com/macros/s/AKfycbxV7NG4QYnYxcpJtwjqaUeHTWaK7X4JbrLFqNg9einCXEhGqzHmeJr1vcFLFMl8B7Ct/exec';
 const REFRESH_SECONDS = 60;
 
 // ── COLORS ──────────────────────────────────────────────────
@@ -765,7 +765,10 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   }
 
   // ── ARC INTERIOR (2023, semitransparent) ──
-  const histList = ordered.map(p => ({...p, escons: hSeats[p.nom] || 0}));
+  const histList = ordered.map(p => {
+    const equiv = PARTY_CONFIG.HIST_MAP[p.nom] || p.nom;
+    return {...p, escons: hSeats[p.nom] || hSeats[equiv] || 0};
+  });
   renderArc(histList, p => p.escons, I_R1, I_R2, 0.4);
 
   // ── ARC EXTERIOR (2027) ──
