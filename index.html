@@ -534,7 +534,7 @@ const HIST_SEATS = {
   parlament: {PP:5,PSOE:4,'MÉS':2,UP:1,VOX:1,Cs:0,PLIE:0},
   mao:       {PSOE:8,PP:8,'ARA MAÓ':4,VOX:1,Cs:0},
   ciutadella:{PP:9,PSOE:5,PSM:5,'C. ENDAVANT':1,VOX:1,Cs:0,PLIE:0},
-  alaior:    {PP:8,PSOE:3,AVANCEM:2},
+  alaior:    {PP:7,PSOE:3,AVANCEM:3},
   ferreries: {PP:6,ENTESA:3,PSOE:2},
   mercadal:  {PSOE:5,ENTESA:4,PP:4},
   santlluis: {PP:6,PSOE:3,VOLEM:3,XBALEARS:1},
@@ -553,7 +553,8 @@ function winner(partits) {
 }
 
 function trendV(nom, hist, cur) {
-  const h=hist[nom];
+  const equiv = PARTY_CONFIG.HIST_MAP[nom] || nom;
+  const h = hist[nom] !== undefined ? hist[nom] : hist[equiv];
   if(h===undefined) return `<span class="trend t-new">NOU</span>`;
   const d=cur-h;
   if(d>0)  return `<span class="trend t-up">▲+${fN(d)}</span>`;
@@ -561,8 +562,10 @@ function trendV(nom, hist, cur) {
   return `<span class="trend t-eq">=</span>`;
 }
 function trendS(nom, histS, cur) {
-  if(!histS || histS[nom]===undefined) return '';
-  const d=cur-histS[nom];
+  const equiv = PARTY_CONFIG.HIST_MAP[nom] || nom;
+  const h = histS && histS[nom] !== undefined ? histS[nom] : (histS && histS[equiv] !== undefined ? histS[equiv] : undefined);
+  if(h===undefined) return '';
+  const d=cur-h;
   if(d>0)  return `<span class="trend t-up" style="font-size:.58rem">▲${d}</span>`;
   if(d<0)  return `<span class="trend t-dn" style="font-size:.58rem">▼${Math.abs(d)}</span>`;
   return `<span class="trend t-eq" style="font-size:.58rem">=</span>`;
