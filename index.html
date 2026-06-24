@@ -338,7 +338,7 @@ const PARTY_CONFIG = {
   // Mapatge històric: candidatura nova → candidatura anterior
   // (per comparar amb 28M 2023 encara que el nom hagi canviat)
   HIST_MAP: {
-    // 'EXEMPLE': 'EXEMPLE'
+    // Exemple: 'NOM NOU': 'NOM ANTIC'
   }
 };
 
@@ -1096,13 +1096,38 @@ async function loadData() {
   catch(e) { console.warn('Using demo data',e); return CURRENT; }
 }
 
-async function renderAll(data) {
-  // Assigna colors a tots els partits del JSON
-  Object.keys(data).forEach(k => {
-    if (data[k] && data[k].partits) {
-      assignColors(data[k].partits);
-    }
-  });
+async function renderAll(raw) {
+  // Suporta tant el format nou {eleccions, config} com l'antic {cime, parlament, ...}
+  const data = raw.eleccions || raw;
+  const cfg  = raw.config || {};
+
+  // Aplica configuració del full CONFIG del Sheet (colors, ordre, equiv)
+  if (Object.keys(cfg).length > 0) {
+    Object.keys(cfg).forEach(elKey => {
+      if (!data[elKey]) return;
+      const cfgList = cfg[elKey];
+      // Aplica colors del CONFIG
+      data[elKey].partits.forEach(p => {
+        const cfgP = cfgList.find(c => c.nom === p.nom);
+        if (cfgP) p.color = cfgP.color;
+        else if (!p.color) p.color = C[p.nom] || '#888';
+      });
+      // Actualitza PARTY_CONFIG dinàmicament
+      PARTY_CONFIG.IDEO_ORDER[elKey] = cfgList.map(c => c.nom);
+      cfgList.forEach(c => {
+        if (c.equiv && c.equiv !== c.nom) {
+          PARTY_CONFIG.HIST_MAP[c.nom] = c.equiv;
+        }
+        C[c.nom] = c.color;
+      });
+    });
+  } else {
+    // Fallback: colors de l'objecte C hardcoded
+    Object.keys(data).forEach(k => {
+      if (data[k] && data[k].partits) assignColors(data[k].partits);
+    });
+  }
+
   renderSupraPanel('cime', data.cime);
   renderSupraPanel('parlament', data.parlament);
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
