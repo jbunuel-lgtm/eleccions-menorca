@@ -768,10 +768,28 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   }
 
   // ── ARC INTERIOR (2023, semitransparent) ──
-  const histList = ordered.map(p => {
-    const equiv = PARTY_CONFIG.HIST_MAP[p.nom] || p.nom;
-    return {...p, escons: hSeats[p.nom] || hSeats[equiv] || 0};
-  });
+  // Inclou TOTS els partits del 2023, fins i tot els que no concorren el 2027
+  const histList = (() => {
+    // Partits actuals amb escons el 2023 (via nom directe o equivalent)
+    const result = ordered.map(p => {
+      const equiv = PARTY_CONFIG.HIST_MAP[p.nom] || p.nom;
+      const escons = hSeats[p.nom] !== undefined ? hSeats[p.nom] : (hSeats[equiv] || 0);
+      return {...p, escons, _histNom: equiv};
+    });
+    // Afegeix partits del 2023 que no concorren el 2027
+    const nomsCobertos = new Set(result.map(p => p._histNom));
+    Object.keys(hSeats).forEach(nomHist => {
+      if (!nomsCobertos.has(nomHist) && hSeats[nomHist] > 0) {
+        result.push({
+          nom: nomHist,
+          color: C[nomHist] || '#aaa',
+          escons: hSeats[nomHist],
+          _histNom: nomHist
+        });
+      }
+    });
+    return result;
+  })();
   renderArc(histList, p => p.escons, I_R1, I_R2, 0.4);
 
   // ── ARC EXTERIOR (2027) ──
