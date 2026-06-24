@@ -673,7 +673,7 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   if (!svg) return;
   svg.innerHTML = '';
 
-  const W = 400, H = 220;
+  const W = 400, H = 234;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const cx = W / 2, cy = H - 16;
 
@@ -845,25 +845,51 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   });
 
   // ── LLEGENDA partits a sota ──
+  // Línia 1: partits del 2027 (arc exterior)
   const active = ordered.filter(p => p.escons > 0);
-  if (active.length > 0) {
-    const totalW = active.length * 72;
-    const startX = Math.max(10, (W - totalW) / 2);
-    active.forEach((p, i) => {
-      const lx = startX + i * 72;
-      const ly = H - 2;
+  // Línia 2: partits del 2023 que NO concorren el 2027
+  const nomsCobertos = new Set(ordered.map(p => PARTY_CONFIG.HIST_MAP[p.nom] || p.nom));
+  const histOnly = Object.keys(hSeats)
+    .filter(n => hSeats[n] > 0 && !nomsCobertos.has(n))
+    .map(n => ({nom: n, escons: hSeats[n], color: C[n] || '#aaa'}));
+
+  function addLegendRow(items, ly, opacity) {
+    if (items.length === 0) return;
+    const itemW = 72;
+    const totalW = items.length * itemW;
+    const startX = Math.max(8, (W - totalW) / 2);
+    items.forEach((p, i) => {
+      const lx = startX + i * itemW;
       const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      r.setAttribute('x',lx.toFixed(0)); r.setAttribute('y',(ly-8).toFixed(0));
-      r.setAttribute('width','9'); r.setAttribute('height','9');
-      r.setAttribute('rx','2'); r.setAttribute('fill',p.color||'#888');
+      r.setAttribute('x', lx.toFixed(0)); r.setAttribute('y', (ly - 8).toFixed(0));
+      r.setAttribute('width', '9'); r.setAttribute('height', '9');
+      r.setAttribute('rx', '2'); r.setAttribute('fill', p.color || '#888');
+      if (opacity < 1) r.setAttribute('opacity', opacity);
       svg.appendChild(r);
       const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',(lx+13).toFixed(0)); t.setAttribute('y',(ly).toFixed(0));
-      t.setAttribute('font-size','7.5'); t.setAttribute('font-weight','600');
-      t.setAttribute('fill','var(--ink)');
-      t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
-      t.textContent = p.nom+' ('+p.escons+')'; svg.appendChild(t);
+      t.setAttribute('x', (lx + 13).toFixed(0)); t.setAttribute('y', ly.toFixed(0));
+      t.setAttribute('font-size', '7.5'); t.setAttribute('font-weight', '600');
+      t.setAttribute('fill', `rgba(26,20,16,${opacity})`);
+      t.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
+      t.textContent = p.nom + ' (' + p.escons + ')';
+      svg.appendChild(t);
     });
+  }
+
+  // Línia 1: partits 2027
+  addLegendRow(active, H - 13, 1.0);
+
+  // Línia 2: partits 2023 que no concorren (semitransparent, més petits)
+  if (histOnly.length > 0) {
+    // Petit separador "2023:"
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x', '8'); lbl.setAttribute('y', (H - 1).toFixed(0));
+    lbl.setAttribute('font-size', '6.5'); lbl.setAttribute('font-weight', '500');
+    lbl.setAttribute('fill', 'rgba(26,20,16,.35)');
+    lbl.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
+    lbl.textContent = '2023:';
+    svg.appendChild(lbl);
+    addLegendRow(histOnly, H - 1, 0.4);
   }
 }
 
@@ -937,7 +963,7 @@ function renderSupraPanel(key, data) {
       <div class="hemi-card anim">
         <div class="hemi-label">Distribució d'escons</div>
         <div class="hemi-title">${data.totalSeats} escons · D'Hondt</div>
-        <svg class="hemi" viewBox="0 0 400 220" id="hemi-${key}"></svg>
+        <svg class="hemi" viewBox="0 0 400 234" id="hemi-${key}"></svg>
         <div class="hemi-legend" id="leg-${key}"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
@@ -1066,7 +1092,7 @@ function renderMuniPanel(key, data) {
       <div class="hemi-card anim">
         <div class="hemi-label">Distribució de regidors</div>
         <div class="hemi-title">${data.totalSeats} regidors · D'Hondt</div>
-        <svg class="hemi" viewBox="0 0 400 220" id="hemi-${key}"></svg>
+        <svg class="hemi" viewBox="0 0 400 234" id="hemi-${key}"></svg>
         <div class="hemi-legend" id="leg-${key}"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
