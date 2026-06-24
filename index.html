@@ -768,26 +768,36 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   }
 
   // ── ARC INTERIOR (2023, semitransparent) ──
-  // Inclou TOTS els partits del 2023, fins i tot els que no concorren el 2027
+  // Inclou TOTS els partits del 2023, en ordre ideològic
   const histList = (() => {
-    // Partits actuals amb escons el 2023 (via nom directe o equivalent)
-    const result = ordered.map(p => {
-      const equiv = PARTY_CONFIG.HIST_MAP[p.nom] || p.nom;
-      const escons = hSeats[p.nom] !== undefined ? hSeats[p.nom] : (hSeats[equiv] || 0);
-      return {...p, escons, _histNom: equiv};
-    });
-    // Afegeix partits del 2023 que no concorren el 2027
-    const nomsCobertos = new Set(result.map(p => p._histNom));
-    Object.keys(hSeats).forEach(nomHist => {
-      if (!nomsCobertos.has(nomHist) && hSeats[nomHist] > 0) {
+    const ideoOrd = PARTY_CONFIG.IDEO_ORDER[elKey] || [];
+    const result = [];
+    const afegits = new Set();
+
+    // 1. Partits en ordre ideològic (2027 + equivalents del 2023)
+    ideoOrd.forEach(n2027 => {
+      const equiv = PARTY_CONFIG.HIST_MAP[n2027] || n2027;
+      const seats = hSeats[n2027] !== undefined ? hSeats[n2027] : (hSeats[equiv] || 0);
+      const p = ordered.find(x => x.nom === n2027);
+      if (seats > 0) {
         result.push({
-          nom: nomHist,
-          color: C[nomHist] || '#aaa',
-          escons: hSeats[nomHist],
-          _histNom: nomHist
+          nom: n2027,
+          color: p ? p.color : (C[n2027] || C[equiv] || '#aaa'),
+          escons: seats
         });
       }
+      afegits.add(equiv);
     });
+
+    // 2. Partits del 2023 que no apareixen a l'ordre ideològic del 2027
+    // Els inserim en la posició correcta segons l'ordre ideològic global
+    // Per ara els afegim al final si no hi són
+    Object.keys(hSeats).forEach(n => {
+      if (hSeats[n] > 0 && !afegits.has(n)) {
+        result.push({nom: n, color: C[n] || '#aaa', escons: hSeats[n]});
+      }
+    });
+
     return result;
   })();
   renderArc(histList, p => p.escons, I_R1, I_R2, 0.4);
@@ -990,7 +1000,7 @@ function renderSupraPanel(key, data) {
         <div class="hemi-label">Distribució d'escons</div>
         <div class="hemi-title">${data.totalSeats} escons · D'Hondt</div>
         <svg class="hemi" viewBox="0 0 400 250" id="hemi-${key}"></svg>
-        <div class="hemi-legend" id="leg-${key}"></div>
+        <div class="hemi-legend" id="leg-${key}" style="display:none"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
     </div>
@@ -1007,7 +1017,6 @@ function renderSupraPanel(key, data) {
 
   renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
   drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
-  drawLegend('leg-'+key,data.partits);
   renderRightCard(key, data, HIST_SEATS[key]);
   renderMuniTable(data.municipis,data.partits.map(p=>p.nom),'muni-'+key);
 }
@@ -1119,7 +1128,6 @@ function renderMuniPanel(key, data) {
         <div class="hemi-label">Distribució de regidors</div>
         <div class="hemi-title">${data.totalSeats} regidors · D'Hondt</div>
         <svg class="hemi" viewBox="0 0 400 250" id="hemi-${key}"></svg>
-        <div class="hemi-legend" id="leg-${key}"></div>
       </div>
       <div class="hemi-card anim" id="right-card-${key}"></div>
     </div>
@@ -1134,7 +1142,6 @@ function renderMuniPanel(key, data) {
 
   renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
   drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
-  drawLegend('leg-'+key,data.partits);
   renderRightCard(key, data, HIST_SEATS[key]);
 }
 
