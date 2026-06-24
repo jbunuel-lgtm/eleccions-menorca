@@ -542,6 +542,17 @@ const HIST_SEATS = {
   migjorn:   {PP:7,PSOE:4}
 };
 
+// ── VOTS HISTÒRICS PER MUNICIPI 28M 2023 ────────────────────
+const HIST_VOTES_MUNI_CIME = {
+  alaior:     {"Cs":19,  "MÉS":604,  "PP":2047, "PSOE":1124, "PLIE":7,  "UP":221, "VOX":194},
+  ciutadella: {"Cs":255, "MÉS":2553, "PP":4504, "PSOE":2419, "PLIE":80, "UP":718, "VOX":703},
+  ferreries:  {"Cs":17,  "MÉS":562,  "PP":1123, "PSOE":599,  "PLIE":12, "UP":112, "VOX":110},
+  mao:        {"Cs":156, "MÉS":1562, "PP":4326, "PSOE":3764, "PLIE":42, "UP":757, "VOX":802},
+  mercadal:   {"Cs":7,   "MÉS":468,  "PP":631,  "PSOE":621,  "PLIE":2,  "UP":105, "VOX":164},
+  santlluis:  {"Cs":34,  "MÉS":376,  "PP":993,  "PSOE":840,  "PLIE":8,  "UP":201, "VOX":183},
+  escastell:  {"Cs":28,  "MÉS":473,  "PP":1271, "PSOE":959,  "PLIE":16, "UP":253, "VOX":241},
+  migjorn:    {"Cs":1,   "MÉS":174,  "PP":412,  "PSOE":228,  "PLIE":3,  "UP":21,  "VOX":23},
+};
 // ── HELPERS ─────────────────────────────────────────────────
 const fN = n => Math.round(n).toLocaleString('ca-ES');
 const pct = (v,t) => t>0 ? ((v/t)*100).toFixed(1) : '0.0';
@@ -984,7 +995,76 @@ function drawLegend(cid, partits) {
 }
 
 // ── MUNI DESGLOSSAT TABLE ───────────────────────────────────
-function renderMuniTable(municipis, keys, cid) {
+function renderMuniTable(municipis, keys, cid, histVotesTotal, histVotesMuni) {
+  const el=document.getElementById(cid);
+  if(!el||!municipis) return;
+  let html=`<div class="results-card anim"><div class="results-card-header">
+    <span class="results-card-title">Resultats per municipi</span>
+    <span class="results-card-meta">Vots i % per candidatura · ▲▼ vs. 28M 2023</span>
+  </div><div class="muni-table-wrap"><table class="muni-table"><thead><tr>
+    <th>Municipi</th><th class="scrut-th">Escrutat</th><th>Part.</th>`;
+  keys.forEach(k=>{ html+=`<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
+  html+=`</tr></thead><tbody>`;
+
+  // Clau del municipi: normalitza nom → clau interna
+  const muniKey = nom => nom.toLowerCase()
+    .replace(/\s+/g,'').replace(/[àá]/g,'a').replace(/[èé]/g,'e')
+    .replace(/[íï]/g,'i').replace(/[òó]/g,'o').replace(/[úü]/g,'u')
+    .replace(/ç/g,'c').replace(/·/g,'').replace(/'/g,'');
+
+  function voteArrow(vAct, vHist) {
+    if (!vHist || vAct === 0) return '';
+    const d = vAct - vHist;
+    if (d > 0) return `<span class="trend t-up" style="font-size:.5rem;margin-left:2px">▲</span>`;
+    if (d < 0) return `<span class="trend t-dn" style="font-size:.5rem;margin-left:2px">▼</span>`;
+    return `<span class="trend t-eq" style="font-size:.5rem;margin-left:2px">=</span>`;
+  }
+
+  municipis.forEach((m,ri)=>{
+    const tot=Object.values(m.vots).reduce((a,b)=>a+b,0);
+    const w=Object.entries(m.vots).sort((a,b)=>b[1]-a[1])[0];
+    const sp=m.meses>0?Math.round(m.mesasEscr/m.meses*100):0;
+    const mk = muniKey(m.nom);
+    const histMuni = histVotesMuni && histVotesMuni[mk] ? histVotesMuni[mk] : null;
+
+    html+=`<tr><td>
+      <span style="display:inline-block;width:7px;height:7px;background:${C[w[0]]||'#aaa'};border-radius:50%;margin-right:6px;vertical-align:middle"></span>${m.nom}
+    </td><td style="text-align:center">
+      <div class="scrut-mini" style="color:${sp>=100?'var(--up)':'var(--accent2)'}">${sp}%</div>
+      <div class="scrut-mini-bar"><div class="scrut-mini-fill" style="width:${sp}%"></div></div>
+      <div style="font-size:.58rem;color:var(--muted)">${m.mesasEscr}/${m.meses}</div>
+    </td><td style="color:var(--muted);font-size:.68rem">${m.part}</td>`;
+    keys.forEach(k=>{
+      const v=m.vots[k]||0;
+      const p=tot>0?((v/tot)*100).toFixed(1):'0.0';
+      const isW=w[0]===k;
+      // Fletxa exacta per municipi si tenim dades; sinó per total
+      const vHist = histMuni ? (histMuni[k]||0) : null;
+      const arrow = vHist !== null ? voteArrow(v, vHist) : '';
+      html+=`<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">${fN(v)}${arrow}<br><span style="font-size:.6rem;color:var(--muted)">${p}%</span></td>`;
+    });
+    html+=`</tr>`;
+  });
+
+  // Totals
+  const tots={};
+  keys.forEach(k=>{ tots[k]=municipis.reduce((s,m)=>s+(m.vots[k]||0),0); });
+  const gt=Object.values(tots).reduce((a,b)=>a+b,0);
+  const tM=municipis.reduce((s,m)=>s+(m.meses||0),0);
+  const tE=municipis.reduce((s,m)=>s+(m.mesasEscr||0),0);
+  const spT=tM>0?Math.round(tE/tM*100):0;
+  html+=`<tr class="total-row"><td>TOTAL MENORCA</td>
+    <td style="text-align:center;font-size:.68rem">${spT}%<br><span style="opacity:.5;font-size:.6rem">${tE}/${tM}</span></td>
+    <td style="opacity:.4">—</td>`;
+  keys.forEach(k=>{
+    const v=tots[k], p=gt>0?((v/gt)*100).toFixed(1):'0.0';
+    const vHist = histVotesTotal ? (histVotesTotal[k]||0) : null;
+    const arrow = vHist !== null ? voteArrow(v, vHist) : '';
+    html+=`<td>${fN(v)}${arrow}<br><span style="font-size:.6rem;opacity:.5">${p}%</span></td>`;
+  });
+  html+=`</tr></tbody></table></div></div>`;
+  el.innerHTML=html;
+}
   const el=document.getElementById(cid);
   if(!el||!municipis) return;
   let html=`<div class="results-card anim"><div class="results-card-header">
@@ -994,6 +1074,11 @@ function renderMuniTable(municipis, keys, cid) {
     <th>Municipi</th><th class="scrut-th">Escrutat</th><th>Part.</th>`;
   keys.forEach(k=>{ html+=`<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
   html+=`</tr></thead><tbody>`;
+
+  // Total vots actuals per candidatura (suma de tots els municipis)
+  const totalsActuals={};
+  keys.forEach(k=>{ totalsActuals[k]=municipis.reduce((s,m)=>s+(m.vots[k]||0),0); });
+
   municipis.forEach((m,ri)=>{
     const tot=Object.values(m.vots).reduce((a,b)=>a+b,0);
     const w=Object.entries(m.vots).sort((a,b)=>b[1]-a[1])[0];
@@ -1009,7 +1094,28 @@ function renderMuniTable(municipis, keys, cid) {
       const v=m.vots[k]||0;
       const p=tot>0?((v/tot)*100).toFixed(1):'0.0';
       const isW=w[0]===k;
-      html+=`<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">${fN(v)}<br><span style="font-size:.6rem;color:var(--muted)">${p}%</span></td>`;
+
+      // Fletxa: compara vots actuals d'aquest municipi amb la proporció del 2023
+      // Usem la proporció del municipi dins el total actual vs. el 2023
+      let arrow='';
+      if (v>0 && histVotesTotal && histVotesTotal[k] !== undefined && totalsActuals[k] > 0) {
+        const propActual = v / totalsActuals[k];
+        // Vots esperats el 2023 per aquest municipi (proporcional al total)
+        // Comparem si el municipi aporta més o menys % que la mitjana
+        // Alternativament: si el total actual del CIME és >0, comparem ràtios
+        // Per simplicitat: fletxa amunt si el % de vots del municipi per aquest partit
+        // és superior al % que tenia el 2023 sobre el total de Menorca
+        const pctActual = tot>0 ? v/tot : 0;
+        const histTotal2023 = Object.values(histVotesTotal).reduce((a,b)=>a+b,0);
+        const pctHist2023 = histTotal2023>0 ? (histVotesTotal[k]||0)/histTotal2023 : 0;
+        if (pctActual > pctHist2023 + 0.005) {
+          arrow=`<span class="trend t-up" style="font-size:.5rem;margin-left:2px">▲</span>`;
+        } else if (pctActual < pctHist2023 - 0.005) {
+          arrow=`<span class="trend t-dn" style="font-size:.5rem;margin-left:2px">▼</span>`;
+        }
+      }
+
+      html+=`<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">${fN(v)}${arrow}<br><span style="font-size:.6rem;color:var(--muted)">${p}%</span></td>`;
     });
     html+=`</tr>`;
   });
@@ -1025,7 +1131,16 @@ function renderMuniTable(municipis, keys, cid) {
     <td style="opacity:.4">—</td>`;
   keys.forEach(k=>{
     const v=tots[k], p=gt>0?((v/gt)*100).toFixed(1):'0.0';
-    html+=`<td>${fN(v)}<br><span style="font-size:.6rem;opacity:.5">${p}%</span></td>`;
+    // Fletxa total Menorca: compara vots actuals vs. 2023
+    let arrowT='';
+    if (v>0 && histVotesTotal && histVotesTotal[k]!==undefined) {
+      const histTotal2023=Object.values(histVotesTotal).reduce((a,b)=>a+b,0);
+      const pctAct=gt>0?v/gt:0;
+      const pctH=histTotal2023>0?(histVotesTotal[k]||0)/histTotal2023:0;
+      if (pctAct>pctH+0.005) arrowT=`<span class="trend t-up" style="font-size:.5rem">▲</span>`;
+      else if (pctAct<pctH-0.005) arrowT=`<span class="trend t-dn" style="font-size:.5rem">▼</span>`;
+    }
+    html+=`<td>${fN(v)}${arrowT}<br><span style="font-size:.6rem;opacity:.5">${p}%</span></td>`;
   });
   html+=`</tr></tbody></table></div></div>`;
   el.innerHTML=html;
@@ -1062,7 +1177,8 @@ function renderSupraPanel(key, data) {
   renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
   drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
   renderRightCard(key, data, HIST_SEATS[key]);
-  renderMuniTable(data.municipis,data.partits.map(p=>p.nom),'muni-'+key);
+  renderMuniTable(data.municipis,data.partits.map(p=>p.nom),'muni-'+key,HIST_VOTES[key],
+    key==='cime' ? HIST_VOTES_MUNI_CIME : HIST_VOTES_MUNI_PARLAMENT);
 }
 
 // ── RIGHT CARD: Repartiment + Escrutini crític ───────────────
