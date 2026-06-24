@@ -738,8 +738,45 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
     svg.appendChild(t);
   }
 
+  // Etiqueta exterior: nom del partit + % vots, al costat de l'arc exterior
+  function sectorLabel(fromDeg, toDeg, nom, pct) {
+    const sweep = fromDeg - toDeg;
+    if (sweep < 8) return; // massa estret per posar etiqueta
+    const midDeg = (fromDeg + toDeg) / 2;
+    const labelR = O_R2 + 13;
+    const [lx, ly] = xy(labelR, midDeg);
+    // Ancoratge: esquerra si sector a la dreta del centre, dreta si a l'esquerra
+    const anch = midDeg > 90 ? 'end' : midDeg < 90 ? 'start' : 'middle';
+
+    // Nom del partit
+    const tNom = document.createElementNS('http://www.w3.org/2000/svg','text');
+    tNom.setAttribute('x', lx.toFixed(1));
+    tNom.setAttribute('y', (ly - 3).toFixed(1));
+    tNom.setAttribute('text-anchor', anch);
+    tNom.setAttribute('font-size', '7.5');
+    tNom.setAttribute('font-weight', '700');
+    tNom.setAttribute('fill', 'rgba(26,20,16,.75)');
+    tNom.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
+    tNom.textContent = nom;
+    svg.appendChild(tNom);
+
+    // % vots
+    if (pct) {
+      const tPct = document.createElementNS('http://www.w3.org/2000/svg','text');
+      tPct.setAttribute('x', lx.toFixed(1));
+      tPct.setAttribute('y', (ly + 6).toFixed(1));
+      tPct.setAttribute('text-anchor', anch);
+      tPct.setAttribute('font-size', '7');
+      tPct.setAttribute('font-weight', '500');
+      tPct.setAttribute('fill', 'rgba(26,20,16,.45)');
+      tPct.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
+      tPct.textContent = pct;
+      svg.appendChild(tPct);
+    }
+  }
+
   // ── Dibuixa un arc complet (tots els sectors) ──
-  function renderArc(list, seatsFn, r1, r2, opacity) {
+  function renderArc(list, seatsFn, r1, r2, opacity, showLabels) {
     const total = list.reduce((s, p) => s + seatsFn(p), 0);
     if (total === 0) return [];
     const active = list.filter(p => seatsFn(p) > 0);
@@ -747,6 +784,7 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
     const usable = SPREAD - GAP * nGaps;
     let deg = START_DEG;
     const secs = [];
+    const totalVotsArc = list.reduce((s, p) => s + (p.vots || 0), 0);
 
     active.forEach(p => {
       const seats = seatsFn(p);
@@ -760,6 +798,12 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
       const maxSize = Math.min(thickness * 0.55, arcLen * 0.7);
       const fontSize = Math.max(8, Math.min(22, Math.round(maxSize)));
       if (seats > 0) sectorNum(r1, r2, deg, endDeg, seats, fontSize);
+
+      // Etiquetes exteriors: nom + % vots (només arc exterior)
+      if (showLabels && totalVotsArc > 0 && p.vots > 0) {
+        const pct = (p.vots / totalVotsArc * 100).toFixed(1) + '%';
+        sectorLabel(deg, endDeg, p.nom, pct);
+      }
 
       secs.push({nom: p.nom, color: p.color, from: deg, to: endDeg, seats});
       deg = endDeg - GAP;
@@ -800,10 +844,10 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
 
     return result;
   })();
-  renderArc(histList, p => p.escons, I_R1, I_R2, 0.4);
+  renderArc(histList, p => p.escons, I_R1, I_R2, 0.4, false);
 
   // ── ARC EXTERIOR (2027) ──
-  const outerSecs = renderArc(ordered, p => p.escons, O_R1, O_R2, 1.0);
+  const outerSecs = renderArc(ordered, p => p.escons, O_R1, O_R2, 1.0, true);
 
   // ── LÍNIA DE MAJORIA ──
   const majority = Math.floor(totalSeats / 2) + 1;
@@ -855,25 +899,23 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
   });
 
   // ── LLEGENDA: dues línies ──────────────────────────────────
-  // Línia 1 (2027): partits actuals amb escons, en ordre ideològic
-  // Línia 2 (2023): tots els partits del 2023, en ordre ideològic
-
-  function legendRow(items, ly, alpha) {
+  function legendRow(items, ly, alpha, fontSize) {
     if (!items.length) return;
-    const itemW = Math.min(72, (W - 20) / items.length);
+    const itemW = Math.min(72, (W - 32) / items.length);
     const totalW = items.length * itemW;
     const startX = (W - totalW) / 2;
     items.forEach((p, i) => {
       const lx = startX + i * itemW;
+      const sz = parseInt(fontSize);
       const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
-      r.setAttribute('x', lx.toFixed(1)); r.setAttribute('y', (ly - 8).toFixed(1));
-      r.setAttribute('width', '8'); r.setAttribute('height', '8');
+      r.setAttribute('x', lx.toFixed(1)); r.setAttribute('y', (ly - sz + 1).toFixed(1));
+      r.setAttribute('width', (sz - 1).toString()); r.setAttribute('height', (sz - 1).toString());
       r.setAttribute('rx', '2'); r.setAttribute('fill', p.color || '#888');
       r.setAttribute('opacity', alpha);
       svg.appendChild(r);
       const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x', (lx + 11).toFixed(1)); t.setAttribute('y', ly.toFixed(1));
-      t.setAttribute('font-size', '7'); t.setAttribute('font-weight', '600');
+      t.setAttribute('x', (lx + sz + 2).toFixed(1)); t.setAttribute('y', ly.toFixed(1));
+      t.setAttribute('font-size', fontSize); t.setAttribute('font-weight', '600');
       t.setAttribute('fill', `rgba(26,20,16,${alpha})`);
       t.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
       t.textContent = p.nom + ' (' + p.escons + ')';
@@ -881,52 +923,54 @@ function drawHemi(svgId, partits, totalSeats, elKey) {
     });
   }
 
-  // Ordre ideològic per a les llegendes (el mateix que els arcs)
+  // Ordenació: més escons primer; a igualtat, més vots
+  function sortBySeats(items) {
+    return [...items].sort((a, b) => b.escons - a.escons || (b.vots||0) - (a.vots||0));
+  }
+
   const ideoOrder = PARTY_CONFIG.IDEO_ORDER[elKey] || [];
 
-  // Línia 1: partits 2027 amb escons, en ordre ideològic
-  const leg2027 = (ideoOrder.length > 0
+  // Línia 1: partits 2027 amb escons, ordenats per escons desc
+  const leg2027raw = (ideoOrder.length > 0
     ? ideoOrder.map(n => ordered.find(p => p.nom === n)).filter(p => p && p.escons > 0)
     : ordered.filter(p => p.escons > 0));
+  const leg2027 = sortBySeats(leg2027raw);
 
-  // Línia 2: tots els partits del 2023, en ordre ideològic
-  // (inclou els que no concorren el 2027)
-  const hist2023 = [];
-  // Primer, els que estan a l'ordre ideològic (via nom directe o equiv)
+  // Línia 2: tots els partits del 2023, ordenats per escons desc
+  const hist2023raw = [];
   const nomsCobertosLeg = new Set();
   ideoOrder.forEach(n2027 => {
     const equiv = PARTY_CONFIG.HIST_MAP[n2027] || n2027;
     const seats = hSeats[n2027] !== undefined ? hSeats[n2027] : (hSeats[equiv] || 0);
     if (seats > 0) {
       const p = ordered.find(x => x.nom === n2027);
-      hist2023.push({nom: n2027, escons: seats, color: p ? p.color : (C[n2027] || C[equiv] || '#aaa')});
+      hist2023raw.push({nom: n2027, escons: seats, color: p ? p.color : (C[n2027] || C[equiv] || '#aaa'), vots: p ? (p.vots||0) : 0});
       nomsCobertosLeg.add(equiv);
     }
   });
-  // Afegeix els del 2023 no coberts per l'ordre ideològic
   Object.keys(hSeats).forEach(n => {
     if (hSeats[n] > 0 && !nomsCobertosLeg.has(n)) {
-      hist2023.push({nom: n, escons: hSeats[n], color: C[n] || '#aaa'});
+      hist2023raw.push({nom: n, escons: hSeats[n], color: C[n] || '#aaa', vots: 0});
     }
   });
+  const hist2023 = sortBySeats(hist2023raw);
 
-  const LY1 = H - 26;  // y de la línia 2027
-  const LY2 = H - 11;  // y de la línia 2023
+  const LY1 = H - 26;
+  const LY2 = H - 11;
 
-  // Etiqueta "2027" i "2023" a l'esquerra
-  function yearLabel(txt, ly, alpha) {
+  function yearLabel(txt, ly, alpha, fw) {
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x', '4'); t.setAttribute('y', ly.toFixed(1));
-    t.setAttribute('font-size', '6.5'); t.setAttribute('font-weight', '700');
+    t.setAttribute('font-size', '6.5'); t.setAttribute('font-weight', fw || '700');
     t.setAttribute('fill', `rgba(26,20,16,${alpha})`);
     t.setAttribute('font-family', '-apple-system,Helvetica,Arial,sans-serif');
     t.textContent = txt; svg.appendChild(t);
   }
 
-  yearLabel('2027', LY1, 0.6);
-  legendRow(leg2027, LY1, '1');
-  yearLabel('2023', LY2, 0.35);
-  legendRow(hist2023, LY2, '0.45');
+  yearLabel('2027', LY1, 0.6, '700');
+  legendRow(leg2027, LY1, '1', '8.5');
+  yearLabel('2023', LY2, 0.35, '600');
+  legendRow(hist2023, LY2, '0.45', '7');
 }
 
 
