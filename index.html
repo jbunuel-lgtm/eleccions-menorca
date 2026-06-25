@@ -1304,7 +1304,17 @@ async function renderAll(raw) {
   renderSupraPanel('cime', data.cime);
   renderSupraPanel('parlament', data.parlament);
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
-    renderMuniPanel(k, data[k]);
+    if (data[k]) {
+      try { renderMuniPanel(k, data[k]); }
+      catch(e) {
+        console.error('Error panel '+k+':', e);
+        const el = document.getElementById('panel-'+k);
+        if (el) el.innerHTML = `<div style="padding:20px;color:red">Error: ${e.message}</div>`;
+      }
+    } else {
+      const el = document.getElementById('panel-'+k);
+      if (el) el.innerHTML = `<div style="padding:20px;color:orange">Sense dades per a: ${k}</div>`;
+    }
   });
 }
 
