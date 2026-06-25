@@ -1302,8 +1302,19 @@ async function renderAll(raw) {
 
   renderSupraPanel('cime', data.cime);
   renderSupraPanel('parlament', data.parlament);
+
+  // Test directe: forcem contingut a alaior
+  const testEl = document.getElementById('panel-alaior');
+  if (testEl) testEl.innerHTML = '<div style="padding:30px;background:yellow;color:black">TEST: panel-alaior trobat, data=' + (data.alaior ? 'OK' : 'NULL') + '</div>';
+
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
-    if (data[k]) renderMuniPanel(k, data[k]);
+    if (!data[k]) return;
+    try { renderMuniPanel(k, data[k]); }
+    catch(e) {
+      console.error('Error '+k+':', e.message);
+      const el=document.getElementById('panel-'+k);
+      if(el) el.innerHTML=`<div style="padding:30px;color:red"><b>Error ${k}:</b> ${e.message}</div>`;
+    }
   });
 }
 
