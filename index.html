@@ -1226,84 +1226,190 @@ function renderRightCard(key, data, histSeats) {
 }
 
 // ── VOTS PER MESA 28M 2023 (MUNICIPALS) ─────────────────────
-// Format: { municipi: { 'DIST-SECC': { candidatura: vots, ... }, ... } }
-// S'omplirà quan arribin les dades per mesa del 2023
-const HIST_MESA_2023 = {};
+const HIST_SECC_2023 = {
+  alaior: {
+    "1-1":{_c:"C. La Salle","MÉS":239,"PP":564,"PSOE":229},
+    "1-2":{_c:"Espai Rotger","MÉS":174,"PP":516,"PSOE":176},
+    "2-1":{_c:"L·OAC","MÉS":157,"PP":514,"PSOE":218},
+    "2-2":{_c:"Sala Ajuntament","MÉS":244,"PP":456,"PSOE":176},
+    "2-3":{_c:"C. Mestre Durán / Centre Cívic","MÉS":117,"PP":394,"PSOE":133},
+  },
+  ciutadella: {
+    "1-1":{_c:"C. Joan Benejam","C. ENDAVANT":36,"Cs":26,"MÉS":160,"PP":235,"PSOE":120,"VOX":35},
+    "1-2":{_c:"C. Pintor Torrent","C. ENDAVANT":39,"Cs":22,"MÉS":141,"PP":234,"PSOE":143,"VOX":42},
+    "1-3":{_c:"C. Margalida Florit","C. ENDAVANT":74,"Cs":27,"MÉS":200,"PP":280,"PSOE":228,"VOX":44},
+    "1-4":{_c:"C. Pintor Torrent","C. ENDAVANT":46,"Cs":18,"MÉS":103,"PP":213,"PSOE":181,"VOX":55},
+    "1-5":{_c:"C. Pintor Torrent","C. ENDAVANT":62,"Cs":30,"MÉS":115,"PP":274,"PSOE":129,"VOX":77},
+    "2-1":{_c:"Casa de Cultura","C. ENDAVANT":39,"Cs":23,"MÉS":130,"PP":153,"PSOE":103,"VOX":28},
+    "2-2":{_c:"Poliesportiu Municipal","C. ENDAVANT":53,"Cs":19,"MÉS":94,"PP":224,"PSOE":167,"VOX":51},
+    "2-3":{_c:"Hospital Municipal","C. ENDAVANT":57,"Cs":17,"MÉS":193,"PP":312,"PSOE":174,"VOX":39},
+    "2-4":{_c:"Poliesportiu Municipal","C. ENDAVANT":33,"Cs":20,"MÉS":114,"PP":243,"PSOE":147,"VOX":41},
+    "2-5":{_c:"Poliesportiu Municipal","C. ENDAVANT":25,"Cs":9,"MÉS":40,"PP":109,"PSOE":41,"VOX":22},
+    "3-1":{_c:"Casa de Cultura","C. ENDAVANT":52,"Cs":24,"MÉS":178,"PP":242,"PSOE":164,"VOX":33},
+    "3-2":{_c:"C. MdD del Toro","C. ENDAVANT":62,"Cs":26,"MÉS":170,"PP":289,"PSOE":161,"VOX":62},
+    "3-3":{_c:"C. MdD del Toro","C. ENDAVANT":57,"Cs":13,"MÉS":158,"PP":240,"PSOE":127,"VOX":40},
+    "4-1":{_c:"IES J.M.Quadrado","C. ENDAVANT":47,"Cs":17,"MÉS":140,"PP":273,"PSOE":168,"VOX":41},
+    "4-2":{_c:"IES M.A.Cardona","C. ENDAVANT":42,"Cs":22,"MÉS":224,"PP":306,"PSOE":235,"VOX":37},
+    "4-3":{_c:"IES J.M.Quadrado","C. ENDAVANT":50,"Cs":19,"MÉS":203,"PP":243,"PSOE":205,"VOX":38},
+    "4-4":{_c:"IES M.A.Cardona","C. ENDAVANT":70,"Cs":16,"MÉS":122,"PP":272,"PSOE":157,"VOX":51},
+  },
+  escastell: {
+    "1-1":{_c:"Escoleta Municipal","IPEC":80,"PP":409,"PSOE":201,"SOM":142,"XBALEARS":11},
+    "1-2":{_c:"Escoleta Municipal","IPEC":66,"PP":317,"PSOE":175,"SOM":128,"XBALEARS":14},
+    "1-3":{_c:"Casal de Joves","IPEC":29,"PP":375,"PSOE":215,"SOM":139,"XBALEARS":12},
+    "1-4":{_c:"Escoleta Municipal","IPEC":72,"PP":261,"PSOE":128,"SOM":89,"XBALEARS":7},
+    "1-5":{_c:"Escoleta Municipal","IPEC":32,"PP":237,"PSOE":118,"SOM":104,"XBALEARS":20},
+  },
+  ferreries: {
+    "1-1":{_c:"Biblioteca Pública","ENTESA":219,"PP":507,"PSOE":184},
+    "1-2":{_c:"C. Santa Àgueda","ENTESA":229,"PP":529,"PSOE":210},
+    "1-3":{_c:"IES Biel Martí","ENTESA":175,"PP":341,"PSOE":175},
+  },
+  mao: {
+    "1-1":{_c:"OAC Ajuntament","ARA MAÓ":152,"Cs":22,"PP":252,"PSOE":234,"VOX":58},
+    "1-2":{_c:"Sala Cultura Sa Nostra","ARA MAÓ":382,"Cs":14,"PP":420,"PSOE":490,"VOX":54},
+    "2-1":{_c:"Casal Jove","ARA MAÓ":298,"Cs":16,"PP":634,"PSOE":580,"VOX":88},
+    "2-2":{_c:"Claustre Carme","ARA MAÓ":348,"Cs":30,"PP":466,"PSOE":562,"VOX":82},
+    "2-3":{_c:"C. MdD Carme","ARA MAÓ":168,"Cs":28,"PP":340,"PSOE":504,"VOX":86},
+    "2-4":{_c:"C. MdD Carme","ARA MAÓ":158,"Cs":14,"PP":326,"PSOE":502,"VOX":100},
+    "3-1":{_c:"Local Pl. Eivissa","ARA MAÓ":274,"Cs":18,"PP":516,"PSOE":614,"VOX":94},
+    "3-2":{_c:"C. Sa Graduada","ARA MAÓ":320,"Cs":48,"PP":768,"PSOE":648,"VOX":138},
+    "3-3":{_c:"Escola Inf. St Climent","ARA MAÓ":350,"Cs":22,"PP":686,"PSOE":676,"VOX":90},
+    "3-4":{_c:"C. Fontirroig","ARA MAÓ":244,"Cs":42,"PP":698,"PSOE":954,"VOX":148},
+    "3-5":{_c:"C. MdD de Gràcia","ARA MAÓ":172,"Cs":16,"PP":380,"PSOE":524,"VOX":108},
+    "3-6":{_c:"C. Fontirroig","ARA MAÓ":290,"Cs":34,"PP":790,"PSOE":558,"VOX":138},
+    "3-7":{_c:"C. MdD de Gràcia","ARA MAÓ":138,"Cs":10,"PP":320,"PSOE":334,"VOX":84},
+    "4-1":{_c:"Claustre Carme","ARA MAÓ":348,"Cs":24,"PP":496,"PSOE":556,"VOX":100},
+    "4-2":{_c:"Escola Adults J.M.Mir","ARA MAÓ":284,"Cs":26,"PP":808,"PSOE":584,"VOX":118},
+    "5-1":{_c:"Sala Cultura Sa Nostra","ARA MAÓ":196,"Cs":30,"PP":476,"PSOE":234,"VOX":56},
+  },
+  mercadal: {
+    "1-1":{_c:"Ajuntament","ENTESA":352,"PP":226,"PSOE":354},
+    "1-2":{_c:"Ca N'Angel","ENTESA":178,"PP":86,"PSOE":167},
+    "1-3":{_c:"Sala Polivalent","ENTESA":102,"PP":212,"PSOE":117},
+    "1-4":{_c:"Sala Polivalent","ENTESA":67,"PP":106,"PSOE":88},
+  },
+  migjorn: {
+    "1-1":{_c:"C. Francesc d'Albranca","PP":585,"PSOE":299},
+  },
+  santlluis: {
+    "1-1":{_c:"C. Públic","PP":176,"PSOE":134,"VOLEM":71,"XBALEARS":46},
+    "1-2":{_c:"C. Públic","PP":344,"PSOE":236,"VOLEM":167,"XBALEARS":97},
+    "2-1":{_c:"C. Públic","PP":240,"PSOE":114,"VOLEM":154,"XBALEARS":46},
+    "2-2":{_c:"C. Públic","PP":184,"PSOE":63,"VOLEM":89,"XBALEARS":50},
+    "2-3":{_c:"C. Públic","PP":187,"PSOE":147,"VOLEM":96,"XBALEARS":41},
+  },
+};
 
 // ── TAULA DE SECCIONS ELECTORALS ─────────────────────────────
-function renderSeccionsTable(key, meses, partits) {
+function renderSeccionsTable(key, mesesJSON, partits) {
   const el = document.getElementById('seccions-'+key);
   if (!el) return;
 
-  const histMeses = HIST_MESA_2023[key] || {};
-  const keys = partits.map(p => p.nom);
+  const histSecc = HIST_SECC_2023[key] || {};
+  const partKeys = partits.map(p => p.nom);
 
-  // Agrupa meses per secció (dist-secc)
-  const seccions = {};
-  (meses || []).forEach(m => {
-    const seccKey = m.distSecc || m.seccio || m.nom || '?';
-    const nomCol  = m.collegi || '';
-    if (!seccions[seccKey]) seccions[seccKey] = { nom: seccKey, collegi: nomCol, vots: {}, meses: [] };
-    keys.forEach(k => {
-      seccions[seccKey].vots[k] = (seccions[seccKey].vots[k] || 0) + (m.vots[k] || 0);
-    });
-    seccions[seccKey].meses.push(m);
-  });
-
-  if (!Object.keys(seccions).length) {
+  // Si no hi ha dades de seccions del 2023, mostra missatge
+  if (!Object.keys(histSecc).length) {
     el.innerHTML = '<p style="padding:12px;color:var(--muted);font-size:.75rem">Sense dades per secció disponibles</p>';
     return;
   }
 
-  function arrowVots(v, h) {
-    if (h === undefined || h === null) return '';
+  // Dades actuals per secció (del JSON de l'Apps Script)
+  // mesesJSON és un array de meses: [{mesaKey:'1-1A', vots:{...}}, ...]
+  // Agrupem per secció (1-1A → 1-1)
+  const seccActuals = {};
+  if (mesesJSON && mesesJSON.length > 0) {
+    mesesJSON.forEach(m => {
+      const mk = m.mesaKey || m.nom || '';
+      const sc = mk.replace(/[A-ZU]$/i, '');
+      if (!seccActuals[sc]) seccActuals[sc] = {};
+      partKeys.forEach(k => {
+        seccActuals[sc][k] = (seccActuals[sc][k]||0) + (m.vots[k]||0);
+      });
+    });
+  }
+
+  function arrow(v, h) {
+    if (h === undefined || h === null || (v === 0 && h === 0)) return '';
     const d = v - h;
     if (d > 0) return `<span class="trend t-up" style="font-size:.5rem">▲</span>`;
     if (d < 0) return `<span class="trend t-dn" style="font-size:.5rem">▼</span>`;
     return `<span class="trend t-eq" style="font-size:.5rem">=</span>`;
   }
 
+  const hasActuals = Object.keys(seccActuals).length > 0;
+
   let html = `<div class="seccions-table-wrap"><table class="seccions-table"><thead><tr>
-    <th>Secció</th><th>Col·legi</th>`;
-  keys.forEach(k => { html += `<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
+    <th style="text-align:left">Secció</th><th style="text-align:left">Col·legi</th>`;
+  partKeys.forEach(k => { html += `<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
   html += `</tr></thead><tbody>`;
 
-  const totals = {};
-  keys.forEach(k => { totals[k] = 0; });
+  const totals = {}, hist_totals = {};
+  partKeys.forEach(k => { totals[k] = 0; hist_totals[k] = 0; });
 
-  Object.values(seccions).sort((a,b) => a.nom.localeCompare(b.nom)).forEach(s => {
-    const tot = keys.reduce((sum, k) => sum + (s.vots[k] || 0), 0);
-    const histS = histMeses[s.nom] || {};
-    html += `<tr><td>${s.nom}</td><td style="font-weight:400;color:var(--muted)">${s.collegi}</td>`;
-    keys.forEach(k => {
-      const v = s.vots[k] || 0;
-      const p = tot > 0 ? ((v/tot)*100).toFixed(1) : '0.0';
-      const arrow = arrowVots(v, histS[k]);
+  Object.keys(histSecc).sort((a,b) => {
+    const [ad,as_] = a.split('-').map(Number);
+    const [bd,bs_] = b.split('-').map(Number);
+    return ad!==bd ? ad-bd : as_-bs_;
+  }).forEach(sc => {
+    const hd = histSecc[sc];
+    const ad = seccActuals[sc] || {};
+    const tot = partKeys.reduce((s,k) => s+(ad[k]||0), 0);
+    const htot = partKeys.reduce((s,k) => s+(hd[k]||0), 0);
+
+    html += `<tr>
+      <td><strong>${sc}</strong></td>
+      <td style="color:var(--muted);font-weight:400;font-size:.68rem">${hd._c||''}</td>`;
+
+    partKeys.forEach(k => {
+      const v = ad[k]||0;
+      const h = hd[k];
+      const p = tot>0 ? ((v/tot)*100).toFixed(1) : '';
+      const hp = htot>0 ? ((h/htot)*100).toFixed(1) : '';
+      const isW = tot>0 && v>0 && v===Math.max(...partKeys.map(kk=>ad[kk]||0));
+      const ar = hasActuals ? arrow(v, h) : '';
       totals[k] += v;
-      html += `<td>${fN(v)}${arrow}<br><span style="font-size:.58rem;color:var(--muted)">${p}%</span></td>`;
+      hist_totals[k] += (h||0);
+
+      if (hasActuals) {
+        html += `<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">
+          ${v>0?fN(v):'—'}${ar}
+          <br><span style="font-size:.58rem;color:var(--muted)">${p?p+'%':''}</span>
+        </td>`;
+      } else {
+        // Sense dades actuals: mostra dades del 2023
+        html += `<td style="color:var(--muted)">
+          ${h>0?fN(h):'—'}
+          <br><span style="font-size:.58rem">${hp?hp+'%':''}</span>
+        </td>`;
+      }
     });
     html += `</tr>`;
   });
 
   // Fila total
-  const gt = keys.reduce((s, k) => s + totals[k], 0);
+  const gt = partKeys.reduce((s,k)=>s+totals[k],0);
+  const hgt = partKeys.reduce((s,k)=>s+hist_totals[k],0);
   html += `<tr class="total-row"><td>TOTAL</td><td></td>`;
-  keys.forEach(k => {
-    const v = totals[k];
-    const p = gt > 0 ? ((v/gt)*100).toFixed(1) : '0.0';
-    html += `<td>${fN(v)}<br><span style="font-size:.58rem;opacity:.6">${p}%</span></td>`;
+  partKeys.forEach(k => {
+    const v = hasActuals ? totals[k] : hist_totals[k];
+    const total = hasActuals ? gt : hgt;
+    const p = total>0?((v/total)*100).toFixed(1):'0.0';
+    const ar = hasActuals ? arrow(totals[k], hist_totals[k]) : '';
+    html += `<td>${fN(v)}${ar}<br><span style="font-size:.58rem;opacity:.6">${p}%</span></td>`;
   });
   html += `</tr></tbody></table></div>`;
   el.innerHTML = html;
 }
 
-
+// ── MUNICIPAL PANEL ──────────────────────────────────────────
 function renderMuniPanel(key, data) {
   const el=document.getElementById('panel-'+key);
   if(!el) return;
 
   let scrutHTML = '';
-  try { scrutHTML = scrutCardHTML(data); } catch(e) { scrutHTML = '<div style="color:red">Error scrut: '+e.message+'</div>'; }
+  try { scrutHTML = scrutCardHTML(data); } catch(e) { scrutHTML = '<div style="color:red">Error: '+e.message+'</div>'; }
 
   el.innerHTML=`
     <div class="section-kicker">Ajuntament · Resultats</div>
@@ -1335,13 +1441,10 @@ function renderMuniPanel(key, data) {
 
   try { renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key); }
   catch(e) { console.error(key+' renderRows:',e.message); }
-
   try { drawHemi('hemi-'+key,data.partits,data.totalSeats,key); }
   catch(e) { console.error(key+' drawHemi:',e.message); }
-
   try { renderRightCard(key, data, HIST_SEATS[key]); }
   catch(e) { console.error(key+' renderRightCard:',e.message); }
-
   try { renderSeccionsTable(key, data.meses||[], data.partits); }
   catch(e) { console.error(key+' renderSeccionsTable:',e.message); }
 }
@@ -1362,18 +1465,18 @@ function updateClock() {
   const n=new Date(), t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
   ['clock-val','footer-time'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=t; });
 }
-let cdSecs=REFRESH_SECONDS;
+
 function startCountdown() {
+  let cdSecs = REFRESH_SECONDS;
   setInterval(()=>{
     cdSecs--;
+    const cd=document.getElementById('countdown-val');
+    if(cd) cd.textContent=Math.floor(cdSecs/60)+':'+(cdSecs%60).toString().padStart(2,'0');
     if(cdSecs<0){ cdSecs=REFRESH_SECONDS; loadData().then(renderAll); }
-    const m=Math.floor(cdSecs/60),s=cdSecs%60;
-    const e=document.getElementById('countdown-val');
-    if(e) e.textContent=m+':'+String(s).padStart(2,'0');
   },1000);
 }
 
-// ── DATA LOAD ────────────────────────────────────────────────
+// ── LOAD & RENDER ────────────────────────────────────────────
 async function loadData() {
   if(!JSON_URL) return CURRENT;
   try { const r=await fetch(JSON_URL); return await r.json(); }
@@ -1381,11 +1484,10 @@ async function loadData() {
 }
 
 async function renderAll(raw) {
-  // Suporta tant el format nou {eleccions, config} com l'antic {cime, parlament, ...}
   const data = raw.eleccions || raw;
   const cfg  = raw.config || {};
 
-  // Aplica configuració del full CONFIG del Sheet (colors, ordre, equiv)
+  // Aplica configuració del full CONFIG del Sheet
   if (Object.keys(cfg).length > 0) {
     Object.keys(cfg).forEach(elKey => {
       try {
@@ -1412,7 +1514,6 @@ async function renderAll(raw) {
 
   try { renderSupraPanel('cime', data.cime); } catch(e) { console.error('CIME error:',e.message); }
   try { renderSupraPanel('parlament', data.parlament); } catch(e) { console.error('PARL error:',e.message); }
-
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
     if (!data[k]) return;
     try { renderMuniPanel(k, data[k]); }
