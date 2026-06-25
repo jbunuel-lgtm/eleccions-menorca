@@ -527,11 +527,13 @@ const CURRENT = {
 
 // ── HISTORIC ────────────────────────────────────────────────
 const HIST_VOTES = {
-  cime:      {PP:15368,PSOE:10547,'MÉS':6772,UP:2388,VOX:2420,Cs:520,PLIE:169},
-  parlament: {PP:15044,PSOE:10378,'MÉS':6455,UP:2634,VOX:2772,Cs:550,PLIE:165},
-  mao:       {PSOE:4277,PP:4195,'ARA MAÓ':2061,VOX:771,Cs:197},
-  ciutadella:{PP:4142,PSOE:2708,PSM:2484,'C. ENDAVANT':847,VOX:736,Cs:348,PLIE:80},
-  alaior:    {PP:2209,PSOE:834,AVANCEM:782},
+  // Vots totals Menorca 28M 2023 — font: IBESTAT
+  cime:      {PP:15307,PSOE:10554,'MÉS':6772,VOX:2420,UP:2388,Cs:517,PLIE:170},
+  parlament: {PP:15080,PSOE:10413,'MÉS':6486,VOX:2790,UP:2631,Cs:545,PLIE:158},
+  // Vots municipals 28M 2023 (eleccions a l'Ajuntament)
+  mao:       {PSOE:12352,PP:12102,'ARA MAÓ':5840,VOX:2228,Cs:562},
+  ciutadella:{PP:4142,PSOE:2650,PSM:2485,'C. ENDAVANT':844,VOX:736,Cs:348},
+  alaior:    {PP:2444,PSOE:932,AVANCEM:931},
   ferreries: {PP:1377,ENTESA:623,PSOE:569},
   mercadal:  {PSOE:726,ENTESA:699,PP:630},
   santlluis: {PP:1131,PSOE:694,VOLEM:577,XBALEARS:280},
@@ -539,28 +541,29 @@ const HIST_VOTES = {
   migjorn:   {PP:585,PSOE:299}
 };
 const HIST_SEATS = {
-  cime:      {PP:6,PSOE:4,'MÉS':2,VOX:1,UP:0,Cs:0,PLIE:0},
-  parlament: {PP:5,PSOE:4,'MÉS':2,UP:1,VOX:1,Cs:0,PLIE:0},
-  mao:       {PSOE:8,PP:8,'ARA MAÓ':4,VOX:1,Cs:0},
-  ciutadella:{PP:9,PSOE:5,PSM:5,'C. ENDAVANT':1,VOX:1,Cs:0,PLIE:0},
+  // Escons 28M 2023
+  cime:      {PP:6,PSOE:4,'MÉS':2,VOX:1},
+  parlament: {PP:5,PSOE:4,'MÉS':2,UP:1,VOX:1},
+  mao:       {PSOE:8,PP:8,'ARA MAÓ':4,VOX:1},
+  ciutadella:{PP:9,PSOE:5,PSM:5,'C. ENDAVANT':1,VOX:1},
   alaior:    {PP:7,PSOE:3,AVANCEM:3},
   ferreries: {PP:6,ENTESA:3,PSOE:2},
   mercadal:  {PSOE:5,ENTESA:4,PP:4},
   santlluis: {PP:6,PSOE:3,VOLEM:3,XBALEARS:1},
-  escastell: {PP:7,PSOE:3,SOM:2,IPEC:1,XBALEARS:0},
+  escastell: {PP:7,PSOE:3,SOM:2,IPEC:1},
   migjorn:   {PP:7,PSOE:4}
 };
 
 // ── VOTS HISTÒRICS PER MUNICIPI 28M 2023 ────────────────────
 const HIST_VOTES_MUNI_CIME = {
-  alaior:     {"Cs":19,  "MÉS":604,  "PP":2047, "PSOE":1124, "PLIE":7,  "UP":221, "VOX":194},
-  ciutadella: {"Cs":255, "MÉS":2553, "PP":4504, "PSOE":2419, "PLIE":80, "UP":718, "VOX":703},
-  ferreries:  {"Cs":17,  "MÉS":562,  "PP":1123, "PSOE":599,  "PLIE":12, "UP":112, "VOX":110},
-  mao:        {"Cs":156, "MÉS":1562, "PP":4326, "PSOE":3764, "PLIE":42, "UP":757, "VOX":802},
-  mercadal:   {"Cs":7,   "MÉS":468,  "PP":631,  "PSOE":621,  "PLIE":2,  "UP":105, "VOX":164},
-  santlluis:  {"Cs":34,  "MÉS":376,  "PP":993,  "PSOE":840,  "PLIE":8,  "UP":201, "VOX":183},
-  escastell:  {"Cs":28,  "MÉS":473,  "PP":1271, "PSOE":959,  "PLIE":16, "UP":253, "VOX":241},
-  migjorn:    {"Cs":1,   "MÉS":174,  "PP":412,  "PSOE":228,  "PLIE":3,  "UP":21,  "VOX":23},
+  alaior:     {"Cs":19,"MÉS":604,"PP":2047,"PSOE":1124,"PLIE":7,"UP":221,"VOX":194},
+  ciutadella: {"Cs":255,"MÉS":2553,"PP":4504,"PSOE":2419,"PLIE":80,"UP":718,"VOX":703},
+  ferreries:  {"Cs":17,"MÉS":562,"PP":1123,"PSOE":599,"PLIE":12,"UP":112,"VOX":110},
+  mao:        {"Cs":156,"MÉS":1562,"PP":4326,"PSOE":3764,"PLIE":42,"UP":757,"VOX":802},
+  mercadal:   {"Cs":7,"MÉS":468,"PP":631,"PSOE":621,"PLIE":2,"UP":105,"VOX":164},
+  santlluis:  {"Cs":34,"MÉS":376,"PP":993,"PSOE":840,"PLIE":8,"UP":201,"VOX":183},
+  escastell:  {"Cs":28,"MÉS":473,"PP":1271,"PSOE":959,"PLIE":16,"UP":253,"VOX":241},
+  migjorn:    {"Cs":1,"MÉS":174,"PP":412,"PSOE":228,"PLIE":3,"UP":21,"VOX":23},
 };
 const HIST_VOTES_MUNI_PARLAMENT = {
   alaior:     {"Cs":32,  "MÉS":556,  "PP":2032, "PSOE":1106, "PLIE":10, "UP":252, "VOX":232},
