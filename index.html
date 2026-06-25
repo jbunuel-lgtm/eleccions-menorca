@@ -553,6 +553,16 @@ const HIST_VOTES_MUNI_CIME = {
   escastell:  {"Cs":28,  "MÉS":473,  "PP":1271, "PSOE":959,  "PLIE":16, "UP":253, "VOX":241},
   migjorn:    {"Cs":1,   "MÉS":174,  "PP":412,  "PSOE":228,  "PLIE":3,  "UP":21,  "VOX":23},
 };
+const HIST_VOTES_MUNI_PARLAMENT = {
+  alaior:     {"Cs":32,  "MÉS":556,  "PP":2032, "PSOE":1106, "PLIE":10, "UP":252, "VOX":232},
+  ciutadella: {"Cs":238, "MÉS":2459, "PP":4408, "PSOE":2499, "PLIE":76, "UP":704, "VOX":797},
+  ferreries:  {"Cs":22,  "MÉS":537,  "PP":1081, "PSOE":597,  "PLIE":7,  "UP":131, "VOX":133},
+  mao:        {"Cs":158, "MÉS":1533, "PP":4285, "PSOE":3604, "PLIE":39, "UP":839, "VOX":913},
+  mercadal:   {"Cs":9,   "MÉS":455,  "PP":620,  "PSOE":609,  "PLIE":3,  "UP":119, "VOX":186},
+  santlluis:  {"Cs":39,  "MÉS":358,  "PP":993,  "PSOE":805,  "PLIE":8,  "UP":239, "VOX":192},
+  escastell:  {"Cs":43,  "MÉS":436,  "PP":1213, "PSOE":929,  "PLIE":11, "UP":291, "VOX":296},
+  migjorn:    {"Cs":1,   "MÉS":133,  "PP":414,  "PSOE":231,  "PLIE":3,  "UP":31,  "VOX":29},
+};
 // ── HELPERS ─────────────────────────────────────────────────
 const fN = n => Math.round(n).toLocaleString('ca-ES');
 const pct = (v,t) => t>0 ? ((v/t)*100).toFixed(1) : '0.0';
@@ -1210,10 +1220,14 @@ function renderRightCard(key, data, histSeats) {
 function renderMuniPanel(key, data) {
   const el=document.getElementById('panel-'+key);
   if(!el) return;
+
+  let scrutHTML = '';
+  try { scrutHTML = scrutCardHTML(data); } catch(e) { scrutHTML = '<div style="color:red">Error scrut: '+e.message+'</div>'; }
+
   el.innerHTML=`
     <div class="section-kicker">Ajuntament · Resultats</div>
-    <div class="section-heading">${data.label}</div>
-    ${scrutCardHTML(data)}
+    <div class="section-heading">${data.label||key}</div>
+    ${scrutHTML}
     <div class="hemicicle-row">
       <div class="hemi-card anim">
         <div class="hemi-label">Distribució de regidors</div>
@@ -1231,9 +1245,14 @@ function renderMuniPanel(key, data) {
       <div id="rows-${key}"></div>
     </div>`;
 
-  renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key);
-  drawHemi('hemi-'+key,data.partits,data.totalSeats,key);
-  renderRightCard(key, data, HIST_SEATS[key]);
+  try { renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key); }
+  catch(e) { console.error(key+' renderRows:',e.message); }
+
+  try { drawHemi('hemi-'+key,data.partits,data.totalSeats,key); }
+  catch(e) { console.error(key+' drawHemi:',e.message); }
+
+  try { renderRightCard(key, data, HIST_SEATS[key]); }
+  catch(e) { console.error(key+' renderRightCard:',e.message); }
 }
 
 // ── TAB SWITCH ───────────────────────────────────────────────
@@ -1300,12 +1319,8 @@ async function renderAll(raw) {
     });
   }
 
-  renderSupraPanel('cime', data.cime);
-  renderSupraPanel('parlament', data.parlament);
-
-  // Test directe: forcem contingut a alaior
-  const testEl = document.getElementById('panel-alaior');
-  if (testEl) testEl.innerHTML = '<div style="padding:30px;background:yellow;color:black">TEST: panel-alaior trobat, data=' + (data.alaior ? 'OK' : 'NULL') + '</div>';
+  try { renderSupraPanel('cime', data.cime); } catch(e) { console.error('CIME error:',e.message); }
+  try { renderSupraPanel('parlament', data.parlament); } catch(e) { console.error('PARL error:',e.message); }
 
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
     if (!data[k]) return;
