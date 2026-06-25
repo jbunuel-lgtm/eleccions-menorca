@@ -595,6 +595,7 @@ function renderWinnersGrid(data) {
   const keys=['cime','parlament','mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'];
   el.innerHTML=keys.map(k=>{
     const d=data[k];
+    if(!d || !d.partits || !d.partits.length) return '';
     const w=winner(d.partits);
     const total=totV(d.partits);
     const p=pct(w.vots,total);
@@ -1273,31 +1274,27 @@ async function renderAll(raw) {
   // Suporta tant el format nou {eleccions, config} com l'antic {cime, parlament, ...}
   const data = raw.eleccions || raw;
   const cfg  = raw.config || {};
-  console.log('DATA KEYS:', Object.keys(data));
-  console.log('HAS ALAIOR:', !!data['alaior'], data['alaior'] ? Object.keys(data['alaior']) : 'undefined');
 
   // Aplica configuració del full CONFIG del Sheet (colors, ordre, equiv)
   if (Object.keys(cfg).length > 0) {
     Object.keys(cfg).forEach(elKey => {
-      if (!data[elKey]) return;
-      const cfgList = cfg[elKey];
-      // Aplica colors del CONFIG
-      data[elKey].partits.forEach(p => {
-        const cfgP = cfgList.find(c => c.nom === p.nom);
-        if (cfgP) p.color = cfgP.color;
-        else if (!p.color) p.color = C[p.nom] || '#888';
-      });
-      // Actualitza PARTY_CONFIG dinàmicament
-      PARTY_CONFIG.IDEO_ORDER[elKey] = cfgList.map(c => c.nom);
-      cfgList.forEach(c => {
-        if (c.equiv && c.equiv !== c.nom) {
-          PARTY_CONFIG.HIST_MAP[c.nom] = c.equiv;
-        }
-        C[c.nom] = c.color;
-      });
+      try {
+        if (!data[elKey] || !data[elKey].partits) return;
+        const cfgList = cfg[elKey];
+        if (!cfgList || !cfgList.length) return;
+        data[elKey].partits.forEach(p => {
+          const cfgP = cfgList.find(c => c.nom === p.nom);
+          if (cfgP) p.color = cfgP.color;
+          else if (!p.color) p.color = C[p.nom] || '#888';
+        });
+        PARTY_CONFIG.IDEO_ORDER[elKey] = cfgList.map(c => c.nom);
+        cfgList.forEach(c => {
+          if (c.equiv && c.equiv !== c.nom) PARTY_CONFIG.HIST_MAP[c.nom] = c.equiv;
+          C[c.nom] = c.color;
+        });
+      } catch(e) { console.warn('Config error for', elKey, e.message); }
     });
   } else {
-    // Fallback: colors de l'objecte C hardcoded
     Object.keys(data).forEach(k => {
       if (data[k] && data[k].partits) assignColors(data[k].partits);
     });
@@ -1306,17 +1303,7 @@ async function renderAll(raw) {
   renderSupraPanel('cime', data.cime);
   renderSupraPanel('parlament', data.parlament);
   ['mao','ciutadella','alaior','ferreries','mercadal','santlluis','escastell','migjorn'].forEach(k=>{
-    if (data[k]) {
-      try { renderMuniPanel(k, data[k]); }
-      catch(e) {
-        console.error('Error panel '+k+':', e);
-        const el = document.getElementById('panel-'+k);
-        if (el) el.innerHTML = `<div style="padding:20px;color:red">Error: ${e.message}</div>`;
-      }
-    } else {
-      const el = document.getElementById('panel-'+k);
-      if (el) el.innerHTML = `<div style="padding:20px;color:orange">Sense dades per a: ${k}</div>`;
-    }
+    if (data[k]) renderMuniPanel(k, data[k]);
   });
 }
 
