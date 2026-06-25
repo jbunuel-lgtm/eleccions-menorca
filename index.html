@@ -1307,28 +1307,32 @@ function renderSeccionsTable(key, mesesJSON, partits) {
   if (!el) return;
 
   const histSecc = HIST_SECC_2023[key] || {};
-  const partKeys = partits.map(p => p.nom);
-
-  // Si no hi ha dades de seccions del 2023, mostra missatge
   if (!Object.keys(histSecc).length) {
     el.innerHTML = '<p style="padding:12px;color:var(--muted);font-size:.75rem">Sense dades per secció disponibles</p>';
     return;
   }
 
-  // Dades actuals per secció (del JSON de l'Apps Script)
-  // mesesJSON és un array de meses: [{mesaKey:'1-1A', vots:{...}}, ...]
-  // Agrupem per secció (1-1A → 1-1)
+  // Partits del 2023 (extrets de HIST_SECC_2023)
+  const partits2023 = [...new Set(
+    Object.values(histSecc).flatMap(s => Object.keys(s).filter(k => !k.startsWith('_')))
+  )];
+
+  // Dades actuals per secció (del JSON)
   const seccActuals = {};
   if (mesesJSON && mesesJSON.length > 0) {
     mesesJSON.forEach(m => {
       const mk = m.mesaKey || m.nom || '';
       const sc = mk.replace(/[A-ZU]$/i, '');
       if (!seccActuals[sc]) seccActuals[sc] = {};
-      partKeys.forEach(k => {
-        seccActuals[sc][k] = (seccActuals[sc][k]||0) + (m.vots[k]||0);
+      partits.forEach(p => {
+        seccActuals[sc][p.nom] = (seccActuals[sc][p.nom]||0) + (m.vots[p.nom]||0);
       });
     });
   }
+  const hasActuals = Object.keys(seccActuals).length > 0;
+
+  // Columnes: si hi ha vots actuals, partits 2027; si no, partits 2023
+  const colKeys = hasActuals ? partits.map(p => p.nom) : partits2023;
 
   function arrow(v, h) {
     if (h === undefined || h === null || (v === 0 && h === 0)) return '';
@@ -1338,15 +1342,16 @@ function renderSeccionsTable(key, mesesJSON, partits) {
     return `<span class="trend t-eq" style="font-size:.5rem">=</span>`;
   }
 
-  const hasActuals = Object.keys(seccActuals).length > 0;
-
   let html = `<div class="seccions-table-wrap"><table class="seccions-table"><thead><tr>
     <th style="text-align:left">Secció</th><th style="text-align:left">Col·legi</th>`;
-  partKeys.forEach(k => { html += `<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
+  colKeys.forEach(k => {
+    const color = C[k] || C[PARTY_CONFIG.HIST_MAP[k]] || 'var(--muted)';
+    html += `<th style="color:${color}">${k}</th>`;
+  });
   html += `</tr></thead><tbody>`;
 
   const totals = {}, hist_totals = {};
-  partKeys.forEach(k => { totals[k] = 0; hist_totals[k] = 0; });
+  colKeys.forEach(k => { totals[k] = 0; hist_totals[k] = 0; });
 
   Object.keys(histSecc).sort((a,b) => {
     const [ad,as_] = a.split('-').map(Number);
@@ -1355,53 +1360,51 @@ function renderSeccionsTable(key, mesesJSON, partits) {
   }).forEach(sc => {
     const hd = histSecc[sc];
     const ad = seccActuals[sc] || {};
-    const tot = partKeys.reduce((s,k) => s+(ad[k]||0), 0);
-    const htot = partKeys.reduce((s,k) => s+(hd[k]||0), 0);
+    const tot  = colKeys.reduce((s,k) => s+(ad[k]||0), 0);
+    const htot = colKeys.reduce((s,k) => s+(hd[k]||0), 0);
 
-    html += `<tr>
-      <td><strong>${sc}</strong></td>
+    html += `<tr><td><strong>${sc}</strong></td>
       <td style="color:var(--muted);font-weight:400;font-size:.68rem">${hd._c||''}</td>`;
 
-    partKeys.forEach(k => {
-      const v = ad[k]||0;
-      const h = hd[k];
-      const p = tot>0 ? ((v/tot)*100).toFixed(1) : '';
-      const hp = htot>0 ? ((h/htot)*100).toFixed(1) : '';
-      const isW = tot>0 && v>0 && v===Math.max(...partKeys.map(kk=>ad[kk]||0));
-      const ar = hasActuals ? arrow(v, h) : '';
-      totals[k] += v;
-      hist_totals[k] += (h||0);
+    colKeys.forEach(k => {
+      const hist_key = PARTY_CONFIG.HIST_MAP[k] || k;
+      const h = hd[k] !== undefined ? hd[k] : (hd[hist_key] !== undefined ? hd[hist_key] : undefined);
 
       if (hasActuals) {
+        const v = ad[k]||0;
+        const p = tot>0 ? ((v/tot)*100).toFixed(1) : '';
+        const isW = tot>0 && v>0 && v===Math.max(...colKeys.map(kk=>ad[kk]||0));
+        totals[k] += v; hist_totals[k] += (h||0);
         html += `<td style="${isW?`font-weight:700;color:${C[k]||'inherit'}`:''}">
-          ${v>0?fN(v):'—'}${ar}
-          <br><span style="font-size:.58rem;color:var(--muted)">${p?p+'%':''}</span>
-        </td>`;
+          ${v>0?fN(v):'—'}${arrow(v,h)}
+          <br><span style="font-size:.58rem;color:var(--muted)">${p?p+'%':''}</span></td>`;
       } else {
-        // Sense dades actuals: mostra dades del 2023
-        html += `<td style="color:var(--muted)">
-          ${h>0?fN(h):'—'}
-          <br><span style="font-size:.58rem">${hp?hp+'%':''}</span>
-        </td>`;
+        const v = hd[k]||0;
+        const p = htot>0 ? ((v/htot)*100).toFixed(1) : '';
+        const isW = htot>0 && v>0 && v===Math.max(...colKeys.map(kk=>hd[kk]||0));
+        hist_totals[k] += v;
+        html += `<td style="${isW?`font-weight:700;color:${C[k]||'var(--muted)'}`:'color:var(--muted)'}">
+          ${v>0?fN(v):'—'}
+          <br><span style="font-size:.58rem">${p?p+'%':''}</span></td>`;
       }
     });
     html += `</tr>`;
   });
 
-  // Fila total
-  const gt = partKeys.reduce((s,k)=>s+totals[k],0);
-  const hgt = partKeys.reduce((s,k)=>s+hist_totals[k],0);
+  // Total
+  const ref = hasActuals ? totals : hist_totals;
+  const gt = colKeys.reduce((s,k)=>s+ref[k],0);
   html += `<tr class="total-row"><td>TOTAL</td><td></td>`;
-  partKeys.forEach(k => {
-    const v = hasActuals ? totals[k] : hist_totals[k];
-    const total = hasActuals ? gt : hgt;
-    const p = total>0?((v/total)*100).toFixed(1):'0.0';
+  colKeys.forEach(k => {
+    const v = ref[k], p = gt>0?((v/gt)*100).toFixed(1):'0.0';
     const ar = hasActuals ? arrow(totals[k], hist_totals[k]) : '';
     html += `<td>${fN(v)}${ar}<br><span style="font-size:.58rem;opacity:.6">${p}%</span></td>`;
   });
   html += `</tr></tbody></table></div>`;
+  if (!hasActuals) html += `<p style="padding:6px 12px;font-size:.65rem;color:var(--muted)">Dades de referència: 28M 2023</p>`;
   el.innerHTML = html;
 }
+
 
 // ── MUNICIPAL PANEL ──────────────────────────────────────────
 function renderMuniPanel(key, data) {
