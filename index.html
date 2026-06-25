@@ -157,7 +157,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font); min-h
 .trend { display: inline-flex; align-items: center; gap: 2px; font-size: .6rem; font-weight: 600; padding: 1px 4px; border-radius: 2px; }
 .t-up { background: #daf0e0; color: var(--up); }
 .t-dn { background: #fde8e4; color: var(--down); }
-.t-eq { background: #ece8df; color: var(--muted); }
+.t-eq { background: #ece8df; color: #1a1410; }
 .t-new { background: #fff3cd; color: #7a5a00; }
 
 /* ── HEMICICLE ── */
@@ -196,6 +196,15 @@ svg.hemi { width: 100%; overflow: visible; }
 .muni-table tr:nth-child(even) td { background: #faf7f2; }
 .muni-table tr:hover td { background: #f5f0e6; }
 .muni-table tr.total-row td { background: var(--ink); color: #fff; font-weight: 700; }
+.seccions-table-wrap { overflow-x: auto; }
+.seccions-table { width: 100%; border-collapse: collapse; font-size: .72rem; }
+.seccions-table th { text-align: right; padding: 7px 8px; font-size: .55rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: #f0ebe0; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.seccions-table th:first-child,.seccions-table th:nth-child(2) { text-align: left; padding-left: 12px; }
+.seccions-table td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.seccions-table td:first-child,.seccions-table td:nth-child(2) { text-align: left; padding-left: 12px; font-weight: 600; white-space: nowrap; }
+.seccions-table tr:nth-child(even) td { background: #faf7f2; }
+.seccions-table tr:hover td { background: #f5f0e6; }
+.seccions-table tr.total-row td { background: var(--ink); color: #fff; font-weight: 700; }
 .muni-table tr.total-row td:first-child { font-weight: 700; }
 .scrut-mini { font-size: .65rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .scrut-mini-bar { height: 2px; background: #e8e3d8; margin-top: 2px; }
@@ -1216,7 +1225,79 @@ function renderRightCard(key, data, histSeats) {
   el.innerHTML = html;
 }
 
-// ── MUNICIPAL PANEL ──────────────────────────────────────────
+// ── VOTS PER MESA 28M 2023 (MUNICIPALS) ─────────────────────
+// Format: { municipi: { 'DIST-SECC': { candidatura: vots, ... }, ... } }
+// S'omplirà quan arribin les dades per mesa del 2023
+const HIST_MESA_2023 = {};
+
+// ── TAULA DE SECCIONS ELECTORALS ─────────────────────────────
+function renderSeccionsTable(key, meses, partits) {
+  const el = document.getElementById('seccions-'+key);
+  if (!el) return;
+
+  const histMeses = HIST_MESA_2023[key] || {};
+  const keys = partits.map(p => p.nom);
+
+  // Agrupa meses per secció (dist-secc)
+  const seccions = {};
+  (meses || []).forEach(m => {
+    const seccKey = m.distSecc || m.seccio || m.nom || '?';
+    const nomCol  = m.collegi || '';
+    if (!seccions[seccKey]) seccions[seccKey] = { nom: seccKey, collegi: nomCol, vots: {}, meses: [] };
+    keys.forEach(k => {
+      seccions[seccKey].vots[k] = (seccions[seccKey].vots[k] || 0) + (m.vots[k] || 0);
+    });
+    seccions[seccKey].meses.push(m);
+  });
+
+  if (!Object.keys(seccions).length) {
+    el.innerHTML = '<p style="padding:12px;color:var(--muted);font-size:.75rem">Sense dades per secció disponibles</p>';
+    return;
+  }
+
+  function arrowVots(v, h) {
+    if (h === undefined || h === null) return '';
+    const d = v - h;
+    if (d > 0) return `<span class="trend t-up" style="font-size:.5rem">▲</span>`;
+    if (d < 0) return `<span class="trend t-dn" style="font-size:.5rem">▼</span>`;
+    return `<span class="trend t-eq" style="font-size:.5rem">=</span>`;
+  }
+
+  let html = `<div class="seccions-table-wrap"><table class="seccions-table"><thead><tr>
+    <th>Secció</th><th>Col·legi</th>`;
+  keys.forEach(k => { html += `<th style="color:${C[k]||'var(--muted)'}">${k}</th>`; });
+  html += `</tr></thead><tbody>`;
+
+  const totals = {};
+  keys.forEach(k => { totals[k] = 0; });
+
+  Object.values(seccions).sort((a,b) => a.nom.localeCompare(b.nom)).forEach(s => {
+    const tot = keys.reduce((sum, k) => sum + (s.vots[k] || 0), 0);
+    const histS = histMeses[s.nom] || {};
+    html += `<tr><td>${s.nom}</td><td style="font-weight:400;color:var(--muted)">${s.collegi}</td>`;
+    keys.forEach(k => {
+      const v = s.vots[k] || 0;
+      const p = tot > 0 ? ((v/tot)*100).toFixed(1) : '0.0';
+      const arrow = arrowVots(v, histS[k]);
+      totals[k] += v;
+      html += `<td>${fN(v)}${arrow}<br><span style="font-size:.58rem;color:var(--muted)">${p}%</span></td>`;
+    });
+    html += `</tr>`;
+  });
+
+  // Fila total
+  const gt = keys.reduce((s, k) => s + totals[k], 0);
+  html += `<tr class="total-row"><td>TOTAL</td><td></td>`;
+  keys.forEach(k => {
+    const v = totals[k];
+    const p = gt > 0 ? ((v/gt)*100).toFixed(1) : '0.0';
+    html += `<td>${fN(v)}<br><span style="font-size:.58rem;opacity:.6">${p}%</span></td>`;
+  });
+  html += `</tr></tbody></table></div>`;
+  el.innerHTML = html;
+}
+
+
 function renderMuniPanel(key, data) {
   const el=document.getElementById('panel-'+key);
   if(!el) return;
@@ -1243,6 +1324,13 @@ function renderMuniPanel(key, data) {
       </div>
       <div class="table-head"><div>Candidatura</div><div>Vots</div><div>%</div><div>Representació</div><div>Regidors</div></div>
       <div id="rows-${key}"></div>
+    </div>
+    <div class="results-card anim" style="margin-top:16px">
+      <div class="results-card-header">
+        <span class="results-card-title">Resultats per seccions electorals</span>
+        <span class="results-card-meta">Vots i % per candidatura · ▲▼ vs. 28M 2023</span>
+      </div>
+      <div id="seccions-${key}"></div>
     </div>`;
 
   try { renderRows(data.partits,'rows-'+key,HIST_VOTES[key],HIST_SEATS[key],key); }
@@ -1253,6 +1341,9 @@ function renderMuniPanel(key, data) {
 
   try { renderRightCard(key, data, HIST_SEATS[key]); }
   catch(e) { console.error(key+' renderRightCard:',e.message); }
+
+  try { renderSeccionsTable(key, data.meses||[], data.partits); }
+  catch(e) { console.error(key+' renderSeccionsTable:',e.message); }
 }
 
 // ── TAB SWITCH ───────────────────────────────────────────────
