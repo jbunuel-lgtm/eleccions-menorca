@@ -1273,6 +1273,8 @@ async function renderAll(raw) {
   // Suporta tant el format nou {eleccions, config} com l'antic {cime, parlament, ...}
   const data = raw.eleccions || raw;
   const cfg  = raw.config || {};
+  console.log('DATA KEYS:', Object.keys(data));
+  console.log('HAS ALAIOR:', !!data['alaior'], data['alaior'] ? Object.keys(data['alaior']) : 'undefined');
 
   // Aplica configuració del full CONFIG del Sheet (colors, ordre, equiv)
   if (Object.keys(cfg).length > 0) {
