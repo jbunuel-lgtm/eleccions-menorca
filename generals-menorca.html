@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultats Eleccions Generals · Menorca</title>
+<style>
+:root{
+  --bg:#f4f1eb; --ink:#161410; --surface:#fff; --border:#d6cfc2; --muted:#7a7468;
+  --accent:#c0311a; --accent2:#1a4a88; --up:#1a6e30; --down:#c0311a;
+  --font:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);min-height:100vh;overflow-x:hidden;font-size:14px}
+
+.masthead{background:var(--ink);color:#fff;padding:0 28px;display:grid;grid-template-columns:auto auto;align-items:stretch;border-bottom:3px solid var(--accent)}
+.masthead-brand{padding:18px 28px 18px 0;border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;justify-content:center}
+.masthead-eyebrow{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;font-weight:500}
+.masthead-title{font-size:1.55rem;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.masthead-title span{color:rgba(255,255,255,.32);font-weight:400}
+.masthead-right{padding:18px 0 18px 24px;border-left:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:7px}
+.live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;font-weight:600}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1.2s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.masthead-meta{font-size:.62rem;color:rgba(255,255,255,.38);text-align:right;line-height:1.9;font-variant-numeric:tabular-nums}
+.masthead-meta strong{color:rgba(255,255,255,.7)}
+
+.nav-tabs{background:var(--ink);display:flex;padding:0 28px;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.tab-btn{font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;padding:12px 20px;border:none;background:none;cursor:pointer;color:rgba(255,255,255,.38);border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;font-weight:500;font-family:var(--font)}
+.tab-btn:hover{color:rgba(255,255,255,.65)}
+.tab-btn.active{color:#fff;border-bottom-color:var(--accent)}
+
+.main-wrap{max-width:1180px;margin:0 auto;padding:32px 28px 80px}
+.section-kicker{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:500}
+.section-heading{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin-bottom:6px;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.section-note{font-size:.72rem;color:var(--muted);margin:-2px 0 20px;line-height:1.5}
+
+.scrut-card{background:var(--surface);border:1.5px solid var(--border);padding:18px 22px;margin-bottom:20px;display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center}
+.scrut-pct{font-size:2.4rem;font-weight:700;color:var(--accent2);letter-spacing:-.03em;line-height:1}
+.scrut-pct small{font-size:1.2rem;color:var(--muted);font-weight:400}
+.scrut-sub{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;font-weight:500}
+.scrut-bar-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:500}
+.scrut-bar{height:6px;background:#e8e3d8}
+.scrut-bar-fill{height:100%;background:var(--accent2);transition:width 1.2s ease}
+.scrut-bar-info{font-size:.68rem;color:var(--muted);margin-top:5px}
+.scrut-bar-info .live{color:var(--accent);font-weight:600}
+.scrut-bar-info .done{color:var(--up);font-weight:600}
+.scrut-right{text-align:right}
+.scrut-right-val{font-size:1.3rem;font-weight:700;letter-spacing:-.02em}
+.scrut-right-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;font-weight:500}
+.scrut-right-sub{font-size:.65rem;color:var(--muted);margin-top:3px}
+
+.senator-card{background:var(--surface);border:1.5px solid var(--border);border-left:6px solid var(--ink);padding:20px 24px;margin-bottom:22px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.senator-label{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px}
+.senator-name{font-size:1.8rem;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.senator-dot{width:16px;height:16px;border-radius:3px;flex-shrink:0}
+.senator-full{font-size:.72rem;color:var(--muted);margin-top:4px}
+.senator-right{text-align:right}
+.senator-pct{font-size:2rem;font-weight:700;letter-spacing:-.03em;line-height:1}
+.senator-votes{font-size:.68rem;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.senator-margin{font-size:.66rem;color:var(--muted);margin-top:5px}
+.senator-margin strong{color:var(--accent)}
+.senator-pending{font-size:.8rem;color:var(--muted)}
+
+.hemicicle-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.hemi-card{background:var(--surface);border:1.5px solid var(--border);padding:20px}
+.hemi-label{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;font-weight:500}
+.hemi-title{font-size:.9rem;font-weight:700;margin-bottom:4px;letter-spacing:-.01em}
+.hemi-sub{font-size:.64rem;color:var(--muted);margin-bottom:10px}
+svg.hemi{width:100%;overflow:visible}
+.seats-bar-item{margin-bottom:8px}
+.seats-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.seats-bar-name{font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.seats-bar-val{font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums}
+.seats-bar-track{height:7px;background:#e8e3d8}
+.seats-bar-fill{height:100%;transition:width 1s ease}
+
+.results-card{background:var(--surface);border:1.5px solid var(--border);margin-bottom:24px;overflow:hidden}
+.results-card-header{background:var(--ink);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;align-items:center}
+.results-card-title{font-size:.82rem;font-weight:700;letter-spacing:-.01em}
+.results-card-meta{font-size:.6rem;color:rgba(255,255,255,.42);letter-spacing:.04em}
+.table-head{display:grid;grid-template-columns:2fr 88px 78px 1fr 120px;padding:8px 18px;background:#f0ebe0;border-bottom:1px solid var(--border);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.table-head>div:nth-child(2),.table-head>div:nth-child(3),.table-head>div:nth-child(5){text-align:right}
+.table-row{display:grid;grid-template-columns:2fr 88px 78px 1fr 120px;padding:11px 18px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s}
+.table-row:last-child{border-bottom:none}
+.table-row:hover{background:#faf7f2}
+.party-cell{display:flex;align-items:center;gap:9px}
+.party-swatch{width:3px;height:30px;flex-shrink:0}
+.party-name{font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.party-full{font-size:.65rem;color:var(--muted);margin-top:1px}
+.votes-cell{font-size:.8rem;font-variant-numeric:tabular-nums;text-align:right}
+.pct-cell{font-size:.85rem;font-weight:600;color:var(--accent2);font-variant-numeric:tabular-nums;text-align:right}
+.bar-cell{padding:0 14px}
+.bar-wrap{height:4px;background:#e8e3d8}
+.bar-fill{height:100%;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.diff-cell{text-align:right;font-size:.78rem;font-variant-numeric:tabular-nums}
+
+.trend{display:inline-flex;align-items:center;gap:2px;font-size:.6rem;font-weight:600;padding:1px 4px;border-radius:2px}
+.t-up{background:#daf0e0;color:var(--up)}
+.t-dn{background:#fde8e4;color:var(--down)}
+.t-eq{background:#ece8df;color:#1a1410}
+.t-new{background:#fff3cd;color:#7a5a00}
+
+.part-section{background:var(--surface);border:1.5px solid var(--border);padding:16px 20px;margin-bottom:24px}
+.part-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.part-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;font-weight:500}
+.part-value{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+.part-sub{font-size:.65rem;color:var(--muted);margin-top:2px}
+
+.muni-table-wrap{overflow-x:auto}
+.muni-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.muni-table th{text-align:right;padding:8px 10px;font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;background:#f0ebe0;border-bottom:1px solid var(--border);white-space:nowrap}
+.muni-table th:first-child{text-align:left;padding-left:16px}
+.muni-table th.scrut-th{color:var(--accent)}
+.muni-table td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.muni-table td:first-child{text-align:left;padding-left:16px;font-weight:600;white-space:nowrap}
+.muni-table tr:nth-child(even) td{background:#faf7f2}
+.muni-table tr:hover td{background:#f5f0e6}
+.muni-table tr.total-row td{background:var(--ink);color:#fff;font-weight:700}
+.scrut-mini{font-size:.65rem;font-weight:700;font-variant-numeric:tabular-nums}
+.scrut-mini-bar{height:2px;background:#e8e3d8;margin-top:2px}
+.scrut-mini-fill{height:100%;background:var(--accent2)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.footer-bar{background:var(--ink);color:rgba(255,255,255,.32);font-size:.62rem;padding:12px 28px;display:flex;justify-content:space-between;letter-spacing:.03em}
+.footer-bar strong{color:rgba(255,255,255,.6)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .3s ease both}
+
+@media(max-width:720px){
+  .masthead{grid-template-columns:1fr}
+  .masthead-right{flex-direction:row;justify-content:space-between;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.07);border-left:none}
+  .main-wrap{padding:20px 14px 60px}
+  .hemicicle-row{grid-template-columns:1fr}
+  .part-grid{grid-template-columns:repeat(2,1fr)}
+  .scrut-card{grid-template-columns:auto 1fr}
+  .scrut-card>:last-child{display:none}
+  .senator-card{grid-template-columns:1fr}
+  .senator-right{text-align:left}
+  .table-head,.table-row{grid-template-columns:2fr 80px 64px 96px}
+  .table-head>div:nth-child(4),.table-row>div:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-brand">
+    <div class="masthead-eyebrow">Eleccions Generals · Menorca</div>
+    <div class="masthead-title">Resultats <span>Electorals</span></div>
+  </div>
+  <div class="masthead-right">
+    <div class="live-pill"><div class="live-dot"></div> En directe</div>
+    <div class="masthead-meta">
+      Actualitzat: <strong id="clock-val">—</strong><br>
+      Refresc en: <strong id="countdown-val">1:00</strong><br>
+      Ref. hist.: 23J 2023
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('congres')">Congrés</button>
+  <button class="tab-btn" onclick="switchTab('senat')">Senat</button>
+</nav>
+
+<div class="main-wrap">
+  <div class="tab-panel active" id="panel-congres"></div>
+  <div class="tab-panel" id="panel-senat"></div>
+</div>
+
+<footer class="footer-bar">
+  <div>Menorca Eleccions Generals · Font: Junta Electoral de Zona</div>
+  <div>Darrera actualització: <strong id="footer-time">—</strong></div>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════════
+const JSON_URL = 'https://script.google.com/macros/s/AKfycbzGblvjLdF2T7Y7G5sXmxkWvB54sLGi4c0sv02q1ewPOpppM17KlwbHqdn_Tfb3nHS_/exec';  // Apps Script (Sheet → dades en directe)
+const REFRESH_SECONDS = 60;
+const ALTRES_THRESHOLD = 0.05;  // < 5% dels vots de l'illa → s'agrupa a "Altres"
+
+// Colors per candidatura (clau = nom curt). Ha de coincidir amb CONFIG del Sheet.
+const C = {
+  PSOE:'#c0311a', 'MÉS-SUMAR':'#c8960a', VOX:'#3a7d44', PP:'#1a4a88',
+  PACMA:'#5a8a3a', FO:'#7a3a3a', PCTE:'#aa3333', RECORTES:'#9a8f7a', Cs:'#c86020', Altres:'#8a8475',
+};
+// Ordre al gràfic (esq → dret). "Altres" agrupa les candidatures < 5%.
+const PARTY_ORDER = ['PSOE','MÉS-SUMAR','Altres','VOX','PP'];
+// Equivalència de noms amb 2023 (si una candidatura canvia de nom): 'ACTUAL':'2023'
+const HIST_MAP = { };
+
+function colorOf(n){ return C[n] || C[HIST_MAP[n]] || '#8a8475'; }
+
+// ════════════════════════════════════════════════════════════
+//  HISTÒRIC 23J 2023  ←  OMPLE AQUESTS VALORS (vots per candidatura)
+// ════════════════════════════════════════════════════════════
+// Font: IBESTAT · Eleccions Generals 23J 2023 (vots vàlids a candidatura).
+// Sumar i Més van anar junts ('Sumar Més') → clau 'MÉS-SUMAR'.
+const HIST_VOTES = {
+  congres:{ PSOE:14687, 'MÉS-SUMAR':9465, VOX:4424, PP:15784, PACMA:487, FO:87, PCTE:73, RECORTES:105 },
+  senat:  { PSOE:15156, 'MÉS-SUMAR':8870, VOX:3577, PP:16222, RECORTES:249 },
+};
+const HIST_VOTES_MUNI = {
+  congres:{
+    mao:       { PSOE:4737, 'MÉS-SUMAR':2595, VOX:1506, PP:4567, PACMA:157, FO:28, PCTE:21, RECORTES:24 },
+    ciutadella:{ PSOE:4168, 'MÉS-SUMAR':3147, VOX:1276, PP:5133, PACMA:167, FO:21, PCTE:23, RECORTES:38 },
+    alaior:    { PSOE:1437, 'MÉS-SUMAR':870,  VOX:428,  PP:1839, PACMA:28,  FO:8,  PCTE:11, RECORTES:10 },
+    ferreries: { PSOE:875,  'MÉS-SUMAR':614,  VOX:200,  PP:938,  PACMA:25,  FO:5,  PCTE:3,  RECORTES:11 },
+    mercadal:  { PSOE:802,  'MÉS-SUMAR':536,  VOX:259,  PP:760,  PACMA:21,  FO:4,  PCTE:2,  RECORTES:2 },
+    santlluis: { PSOE:1085, 'MÉS-SUMAR':739,  VOX:306,  PP:1147, PACMA:37,  FO:10, PCTE:4,  RECORTES:11 },
+    escastell: { PSOE:1295, 'MÉS-SUMAR':823,  VOX:393,  PP:1099, PACMA:46,  FO:11, PCTE:5,  RECORTES:8 },
+    migjorn:   { PSOE:288,  'MÉS-SUMAR':141,  VOX:56,   PP:301,  PACMA:6,   FO:0,  PCTE:4,  RECORTES:1 },
+  },
+  senat:{
+    mao:       { PSOE:4983, 'MÉS-SUMAR':2305, VOX:1191, PP:4729, RECORTES:63 },
+    ciutadella:{ PSOE:4143, 'MÉS-SUMAR':3113, VOX:1092, PP:5155, RECORTES:89 },
+    alaior:    { PSOE:1416, 'MÉS-SUMAR':833,  VOX:300,  PP:1931, RECORTES:17 },
+    ferreries: { PSOE:949,  'MÉS-SUMAR':527,  VOX:156,  PP:951,  RECORTES:18 },
+    mercadal:  { PSOE:789,  'MÉS-SUMAR':528,  VOX:205,  PP:787,  RECORTES:13 },
+    santlluis: { PSOE:1174, 'MÉS-SUMAR':640,  VOX:246,  PP:1178, RECORTES:19 },
+    escastell: { PSOE:1357, 'MÉS-SUMAR':747,  VOX:333,  PP:1127, RECORTES:25 },
+    migjorn:   { PSOE:280,  'MÉS-SUMAR':123,  VOX:32,   PP:315,  RECORTES:3 },
+  },
+};
+
+// ════════════════════════════════════════════════════════════
+//  DADES DE PROVA (fictícies) — només per comprovar el disseny
+// ════════════════════════════════════════════════════════════
+// Noms complets per candidatura
+const NOMS = {
+  PSOE:'PSIB-PSOE', 'MÉS-SUMAR':'Més per Menorca – Sumar', VOX:'Vox',
+  PP:'Partido Popular', PACMA:'PACMA', FO:'Frente Obrero', PCTE:'PCTE',
+  RECORTES:'Recortes Cero', Cs:'Ciudadanos',
+};
+const CURRENT = {
+  congres:{
+    label:'Congrés dels Diputats',
+    nota:'Circumscripció de les Illes Balears · A Menorca no es reparteixen escons: es mostren vots i percentatge per municipi i agregat de l’illa, amb la diferència respecte 2023. L’hemicicle és una simulació d’Hondt orientativa (com si fos el Consell Insular, 13 escons).',
+    totalMeses:105, mesasEscrutades:105, participation:'66,2%', cens:71500,
+    municipis:[
+      {nom:'Maó',            meses:32,mesasEscr:32,part:'67,4%',cens:21500,blancs:118,nuls:84, vots:{PSOE:4980,'MÉS-SUMAR':2540,VOX:1410,PP:4290,Cs:230,PACMA:110}},
+      {nom:'Ciutadella',     meses:32,mesasEscr:32,part:'63,1%',cens:23200,blancs:120,nuls:78, vots:{PSOE:3520,'MÉS-SUMAR':2400,VOX:1180,PP:4620,Cs:180,PACMA:90}},
+      {nom:'Alaior',         meses:10,mesasEscr:10,part:'68,9%',cens:7100, blancs:42, nuls:30, vots:{PSOE:1480,'MÉS-SUMAR':820,VOX:520,PP:1610,Cs:70,PACMA:35}},
+      {nom:'Ferreries',      meses:6, mesasEscr:6, part:'70,2%',cens:3950, blancs:24, nuls:18, vots:{PSOE:720,'MÉS-SUMAR':490,VOX:240,PP:980,Cs:35,PACMA:18}},
+      {nom:'es Mercadal',    meses:5, mesasEscr:5, part:'66,0%',cens:4100, blancs:26, nuls:20, vots:{PSOE:760,'MÉS-SUMAR':500,VOX:320,PP:690,Cs:40,PACMA:20}},
+      {nom:'Sant Lluís',     meses:9, mesasEscr:9, part:'65,5%',cens:5350, blancs:34, nuls:22, vots:{PSOE:980,'MÉS-SUMAR':470,VOX:380,PP:1090,Cs:55,PACMA:28}},
+      {nom:'es Castell',     meses:9, mesasEscr:9, part:'67,8%',cens:5900, blancs:38, nuls:28, vots:{PSOE:1290,'MÉS-SUMAR':750,VOX:560,PP:1180,Cs:60,PACMA:30}},
+      {nom:'es Migjorn Gran',meses:2, mesasEscr:2, part:'72,3%',cens:1200, blancs:10, nuls:6,  vots:{PSOE:510,'MÉS-SUMAR':280,VOX:150,PP:340,Cs:18,PACMA:9}},
+    ],
+  },
+  senat:{
+    label:'Senat',
+    nota:'Circumscripció de Menorca · S’elegeix 1 senador/a: l’escó s’assigna a la candidatura més votada al conjunt de l’illa. L’hemicicle és una simulació d’Hondt orientativa (com si fos el Consell Insular, 13 escons).',
+    totalMeses:105, mesasEscrutades:105, participation:'66,2%', cens:71500,
+    municipis:[
+      {nom:'Maó',            meses:32,mesasEscr:32,part:'67,4%',cens:21500,blancs:150,nuls:92, vots:{PSOE:4880,'MÉS-SUMAR':2350,VOX:1360,PP:4360,Cs:230,PACMA:110}},
+      {nom:'Ciutadella',     meses:32,mesasEscr:32,part:'63,1%',cens:23200,blancs:140,nuls:84, vots:{PSOE:3440,'MÉS-SUMAR':2170,VOX:1120,PP:4720,Cs:180,PACMA:90}},
+      {nom:'Alaior',         meses:10,mesasEscr:10,part:'68,9%',cens:7100, blancs:48, nuls:32, vots:{PSOE:1450,'MÉS-SUMAR':750,VOX:500,PP:1650,Cs:70,PACMA:35}},
+      {nom:'Ferreries',      meses:6, mesasEscr:6, part:'70,2%',cens:3950, blancs:28, nuls:20, vots:{PSOE:700,'MÉS-SUMAR':440,VOX:230,PP:1010,Cs:35,PACMA:18}},
+      {nom:'es Mercadal',    meses:5, mesasEscr:5, part:'66,0%',cens:4100, blancs:30, nuls:22, vots:{PSOE:740,'MÉS-SUMAR':450,VOX:310,PP:710,Cs:40,PACMA:20}},
+      {nom:'Sant Lluís',     meses:9, mesasEscr:9, part:'65,5%',cens:5350, blancs:40, nuls:24, vots:{PSOE:960,'MÉS-SUMAR':420,VOX:360,PP:1120,Cs:55,PACMA:28}},
+      {nom:'es Castell',     meses:9, mesasEscr:9, part:'67,8%',cens:5900, blancs:44, nuls:30, vots:{PSOE:1260,'MÉS-SUMAR':690,VOX:540,PP:1210,Cs:60,PACMA:30}},
+      {nom:'es Migjorn Gran',meses:2, mesasEscr:2, part:'72,3%',cens:1200, blancs:12, nuls:6,  vots:{PSOE:500,'MÉS-SUMAR':260,VOX:140,PP:360,Cs:18,PACMA:9}},
+    ],
+  },
+};
+
+const MUNI_KEY_MAP = {
+  'alaior':'alaior','ciutadella':'ciutadella','ferreries':'ferreries','maó':'mao','mao':'mao',
+  'es mercadal':'mercadal','mercadal':'mercadal','sant lluís':'santlluis','santlluis':'santlluis',
+  'es castell':'escastell','escastell':'escastell','es migjorn gran':'migjorn','migjorn':'migjorn',
+};
+const muniKey = n => { n=(n||'').toLowerCase().trim();
+  return MUNI_KEY_MAP[n] || n.replace(/\s+/g,'').replace(/[àá]/g,'a').replace(/[èé]/g,'e')
+    .replace(/[íï]/g,'i').replace(/[òó]/g,'o').replace(/[úü]/g,'u').replace(/ç/g,'c').replace(/·/g,'').replace(/'/g,''); };
+
+// ── HELPERS ─────────────────────────────────────────────────
+const fN=n=>Math.round(n||0).toLocaleString('ca-ES');
+const pct=(v,t)=>t>0?((v/t)*100).toFixed(1):'0.0';
+const scrutPct=d=>d.totalMeses>0?Math.round(d.mesasEscrutades/d.totalMeses*100):0;
+
+// Construeix la llista de candidatures (totes) a partir dels municipis
+function partitsFromMunicipis(data){
+  const acc={};
+  data.municipis.forEach(m=>Object.keys(m.vots).forEach(k=>acc[k]=(acc[k]||0)+(m.vots[k]||0)));
+  // Ordena segons PARTY_ORDER, i la resta darrere per vots
+  const noms=Object.keys(acc);
+  noms.sort((a,b)=>{
+    let ia=PARTY_ORDER.indexOf(a),ib=PARTY_ORDER.indexOf(b);
+    if(ia<0)ia=900; if(ib<0)ib=900;
+    return ia-ib || acc[b]-acc[a];
+  });
+  return noms.map(n=>({nom:n,complet:NOMS[n]||n,vots:acc[n]}));
+}
+const totV=ps=>ps.reduce((s,p)=>s+(p.vots||0),0);
+
+// Agrupa a "Altres" les candidatures < llindar; retorna llista per mostrar + conjunt agrupat
+function buildDisplay(fullPartits){
+  const total=totV(fullPartits);
+  const keep=[],others=[];
+  fullPartits.forEach(p=>{
+    if(total>0 && (p.vots/total)<ALTRES_THRESHOLD) others.push(p);
+    else keep.push(p);
+  });
+  const otherNoms=new Set(others.map(p=>p.nom));
+  const disp=keep.map(p=>({nom:p.nom,complet:p.complet,vots:p.vots}));
+  const ov=others.reduce((s,p)=>s+p.vots,0);
+  if(ov>0)disp.push({nom:'Altres',complet:'Altres (< 5% a Menorca)',vots:ov});
+  disp.sort((a,b)=>{
+    let ia=PARTY_ORDER.indexOf(a.nom),ib=PARTY_ORDER.indexOf(b.nom);
+    if(ia<0)ia=900; if(ib<0)ib=900; return ia-ib || b.vots-a.vots;
+  });
+  return {disp,otherNoms};
+}
+function displayMunicipis(municipis,dispKeys,otherNoms){
+  const hasAltres=dispKeys.includes('Altres');
+  return municipis.map(m=>{
+    const v={};
+    dispKeys.forEach(k=>{ if(k!=='Altres')v[k]=m.vots[k]||0; });
+    if(hasAltres){ let s=0; otherNoms.forEach(n=>s+=(m.vots[n]||0)); v['Altres']=s; }
+    return {...m,vots:v};
+  });
+}
+function displayHist(histObj,dispKeys){
+  if(!histObj)return null;
+  const out={}; let used=0;
+  dispKeys.filter(k=>k!=='Altres').forEach(k=>{
+    const eq=HIST_MAP[k];
+    const v=(histObj[k]!==undefined?histObj[k]:(eq!==undefined?histObj[eq]:0))||0;
+    out[k]=v; used+=v;
+  });
+  // "Altres" 2023 = tot el que no és candidatura principal (suma de totes les < 5% del 2023)
+  if(dispKeys.includes('Altres')){
+    const tot=Object.values(histObj).reduce((a,b)=>a+(b||0),0);
+    out['Altres']=Math.max(0,tot-used);
+  }
+  return out;
+}
+
+function trendV(nom,hist,cur){
+  if(!hist)return '';
+  const h=hist[nom];
+  if(!h)return '';
+  const d=cur-h;
+  if(d>0)return `<span class="trend t-up">▲ ${fN(d)}</span>`;
+  if(d<0)return `<span class="trend t-dn">▼ ${fN(Math.abs(d))}</span>`;
+  return `<span class="trend t-eq">=</span>`;
+}
+function arrowMini(v,h){
+  if(!h)return '';
+  const d=v-h;
+  if(d>0)return `<span class="trend t-up" style="font-size:.5rem;margin-left:2px">▲</span>`;
+  if(d<0)return `<span class="trend t-dn" style="font-size:.5rem;margin-left:2px">▼</span>`;
+  return `<span class="trend t-eq" style="font-size:.5rem;margin-left:2px">=</span>`;
+}
+
+// ── SCRUTINY CARD ────────────────────────────────────────────
+function scrutCardHTML(data){
+  const sp=scrutPct(data), cls=sp>=100?'done':'live', txt=sp>=100?'✓ Escrutini complet':'Recompte en curs';
+  return `<div class="scrut-card anim">
+    <div><div class="scrut-pct">${sp}<small>%</small></div><div class="scrut-sub">Escrutat</div></div>
+    <div><div class="scrut-bar-label">Meses escrutades</div>
+      <div class="scrut-bar"><div class="scrut-bar-fill" style="width:${sp}%"></div></div>
+      <div class="scrut-bar-info">${data.mesasEscrutades} de ${data.totalMeses} meses · <span class="${cls}">${txt}</span></div></div>
+    <div class="scrut-right"><div class="scrut-right-val">${data.participation||'—'}</div>
+      <div class="scrut-right-label">Participació</div><div class="scrut-right-sub">Cens: ${fN(data.cens||0)}</div></div>
+  </div>`;
+}
+
+// ── SENATOR CARD ─────────────────────────────────────────────
+function senatorCardHTML(disp){
+  const total=totV(disp);
+  if(total===0)return `<div class="senator-card anim"><div><div class="senator-label">Senador/a electe · 1 escó</div><div class="senator-pending">Sense vots encara — pendent d’escrutini.</div></div></div>`;
+  const sorted=[...disp].sort((a,b)=>b.vots-a.vots);
+  const w=sorted[0],second=sorted[1],col=colorOf(w.nom);
+  const margin=second?(w.vots-second.vots):w.vots;
+  return `<div class="senator-card anim" style="border-left-color:${col}">
+    <div><div class="senator-label">Senador/a electe · 1 escó a la candidatura més votada</div>
+      <div class="senator-name"><span class="senator-dot" style="background:${col}"></span>${w.nom}</div>
+      <div class="senator-full">${w.complet||''}</div></div>
+    <div class="senator-right"><div class="senator-pct" style="color:${col}">${pct(w.vots,total)}%</div>
+      <div class="senator-votes">${fN(w.vots)} vots</div>
+      ${second?`<div class="senator-margin">Avantatge sobre ${second.nom}: <strong>${fN(margin)}</strong> vots</div>`:''}</div>
+  </div>`;
+}
+
+// ── ARC DOBLE PER QUOTA DE VOT (ventall) ────────────────────
+// Les franges es dimensionen pel % de vot sobre el total de Menorca
+// (exterior = actual, interior = 23J 2023). No depèn d'escons.
+function drawHemi(svgId, disp, histVotes){
+  const svg=document.getElementById(svgId); if(!svg)return;
+  svg.innerHTML='';
+  const W=400,H=250; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx=W/2, cy=H-52;
+  const O_R1=115,O_R2=178, I_R1=48,I_R2=105;
+  const SPREAD=170, START_DEG=90+SPREAD/2, GAP=1.2;
+  const orderOf=n=>{const i=PARTY_ORDER.indexOf(n);return i<0?900:i;};
+  const ordered=[...disp].sort((a,b)=>orderOf(a.nom)-orderOf(b.nom));
+
+  function xy(r,deg){const rad=deg*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
+  function drawSector(r1,r2,fromDeg,toDeg,color,opacity){
+    if(Math.abs(fromDeg-toDeg)<0.3)return;
+    const pts=[],steps=Math.max(24,Math.round(Math.abs(fromDeg-toDeg)*1.5));
+    for(let i=0;i<=steps;i++){const d=fromDeg+(toDeg-fromDeg)*(i/steps);const[x,y]=xy(r2,d);pts.push(x.toFixed(1)+','+y.toFixed(1));}
+    for(let i=steps;i>=0;i--){const d=fromDeg+(toDeg-fromDeg)*(i/steps);const[x,y]=xy(r1,d);pts.push(x.toFixed(1)+','+y.toFixed(1));}
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',pts.join(' '));poly.setAttribute('fill',color);
+    if(opacity<1)poly.setAttribute('opacity',String(opacity));
+    poly.setAttribute('stroke','rgba(255,255,255,.5)');poly.setAttribute('stroke-width','1');
+    svg.appendChild(poly);
+  }
+  function sectorNum(r1,r2,fromDeg,toDeg,text,sizePx){
+    const midDeg=(fromDeg+toDeg)/2,midR=(r1+r2)/2,[tx,ty]=xy(midR,midDeg);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',tx.toFixed(1));t.setAttribute('y',(ty+sizePx*0.36).toFixed(1));
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size',sizePx);
+    t.setAttribute('font-weight','800');t.setAttribute('fill','#fff');
+    t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+    t.textContent=text;svg.appendChild(t);
+  }
+  function sectorLabel(fromDeg,toDeg,nom,pc){
+    if((fromDeg-toDeg)<7)return;
+    const midDeg=(fromDeg+toDeg)/2,labelR=O_R2+13,[lx,ly]=xy(labelR,midDeg);
+    const anch=midDeg>90?'end':midDeg<90?'start':'middle';
+    const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t1.setAttribute('x',lx.toFixed(1));t1.setAttribute('y',(ly-3).toFixed(1));t1.setAttribute('text-anchor',anch);
+    t1.setAttribute('font-size','7.5');t1.setAttribute('font-weight','700');t1.setAttribute('fill','rgba(26,20,16,.75)');
+    t1.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');t1.textContent=nom;svg.appendChild(t1);
+    if(pc){const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t2.setAttribute('x',lx.toFixed(1));t2.setAttribute('y',(ly+6).toFixed(1));t2.setAttribute('text-anchor',anch);
+      t2.setAttribute('font-size','7');t2.setAttribute('font-weight','500');t2.setAttribute('fill','rgba(26,20,16,.45)');
+      t2.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');t2.textContent=pc;svg.appendChild(t2);}
+  }
+  // Dibuixa un arc; les franges es reparteixen el ventall segons p.vots
+  function renderArc(list,r1,r2,opacity,showLabels){
+    const total=list.reduce((s,p)=>s+(p.vots||0),0); if(total===0)return;
+    const active=list.filter(p=>p.vots>0);
+    const nGaps=Math.max(0,active.length-1), usable=SPREAD-GAP*nGaps;
+    let deg=START_DEG;
+    active.forEach(p=>{
+      const share=p.vots/total, sweep=share*usable, endDeg=deg-sweep;
+      drawSector(r1,r2,deg,endDeg,colorOf(p.nom),opacity);
+      if(showLabels){
+        if(sweep>=12){ const thickness=r2-r1; const fontSize=Math.max(7,Math.min(13,Math.round(thickness*0.34)));
+          sectorNum(r1,r2,deg,endDeg,(share*100).toFixed(0)+'%',fontSize); }
+        sectorLabel(deg,endDeg,p.nom,(share*100).toFixed(1)+'%');
+      }
+      deg=endDeg-GAP;
+    });
+  }
+  // Arc interior (23J 2023)
+  const histList=ordered.map(p=>({nom:p.nom,vots:(histVotes&&histVotes[p.nom])||0})).filter(p=>p.vots>0);
+  histList.sort((a,b)=>orderOf(a.nom)-orderOf(b.nom));
+  const histTotal=histList.reduce((s,p)=>s+p.vots,0);
+  renderArc(histList,I_R1,I_R2,0.4,false);
+  // Arc exterior (actual)
+  const curTotal=ordered.reduce((s,p)=>s+(p.vots||0),0);
+  renderArc(ordered,O_R1,O_R2,1.0,true);
+
+  // Etiquetes Actual / 2023
+  [{r1:O_R1,r2:O_R2,txt:'ACTUAL',sz:9,fw:'700',op:.45},{r1:I_R1,r2:I_R2,txt:'2023',sz:8,fw:'600',op:.3}].forEach(l=>{
+    const midR=(l.r1+l.r2)/2,[lx,ly]=xy(midR,START_DEG+4);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',lx.toFixed(1));t.setAttribute('y',ly.toFixed(1));t.setAttribute('text-anchor','end');
+    t.setAttribute('font-size',l.sz);t.setAttribute('font-weight',l.fw);t.setAttribute('fill',`rgba(0,0,0,${l.op})`);
+    t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');t.textContent=l.txt;svg.appendChild(t); });
+
+  // Llegenda (2 línies) — mostra el % de vot
+  function legendRow(items,total,ly,alpha,fontSize){
+    if(!items.length||total<=0)return;
+    const itemW=Math.min(74,(W-32)/items.length),totalW=items.length*itemW,startX=(W-totalW)/2;
+    items.forEach((p,i)=>{const lx=startX+i*itemW,sz=parseInt(fontSize);
+      const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x',lx.toFixed(1));r.setAttribute('y',(ly-sz+1).toFixed(1));
+      r.setAttribute('width',(sz-1).toString());r.setAttribute('height',(sz-1).toString());
+      r.setAttribute('rx','2');r.setAttribute('fill',colorOf(p.nom));r.setAttribute('opacity',alpha);svg.appendChild(r);
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',(lx+sz+2).toFixed(1));t.setAttribute('y',ly.toFixed(1));
+      t.setAttribute('font-size',fontSize);t.setAttribute('font-weight','600');t.setAttribute('fill',`rgba(26,20,16,${alpha})`);
+      t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+      t.textContent=p.nom+' ('+(p.vots/total*100).toFixed(1)+'%)';svg.appendChild(t);});
+  }
+  function yearLabel(txt,ly,alpha,fw){const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x','4');t.setAttribute('y',ly.toFixed(1));t.setAttribute('font-size','6.5');t.setAttribute('font-weight',fw);
+    t.setAttribute('fill',`rgba(26,20,16,${alpha})`);t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
+    t.textContent=txt;svg.appendChild(t);}
+  const legCur=ordered.filter(p=>p.vots>0).sort((a,b)=>b.vots-a.vots);
+  const legHist=histList.slice().sort((a,b)=>b.vots-a.vots);
+  yearLabel('ACT.',H-26,0.6,'700'); legendRow(legCur,curTotal,H-26,'1','8.5');
+  yearLabel('2023',H-11,0.35,'600'); legendRow(legHist,histTotal,H-11,'0.45','7');
+}
+
+// ── ROWS (candidatures) ──────────────────────────────────────
+function renderRows(disp,cid,histV){
+  const total=totV(disp), el=document.getElementById(cid); if(!el)return; el.innerHTML='';
+  disp.forEach((p,i)=>{
+    const p100=pct(p.vots,total), tv=trendV(p.nom,histV,p.vots), col=colorOf(p.nom);
+    const row=document.createElement('div'); row.className='table-row anim'; row.style.animationDelay=(i*.05)+'s';
+    row.innerHTML=`
+      <div class="party-cell"><div class="party-swatch" style="background:${col}"></div>
+        <div><div class="party-name">${p.nom} ${tv}</div><div class="party-full">${p.complet||''}</div></div></div>
+      <div class="votes-cell">${fN(p.vots)}</div>
+      <div class="pct-cell">${p100}%</div>
+      <div class="bar-cell"><div class="bar-wrap"><div class="bar-fill" style="background:${col};width:0" data-w="${p100}"></div></div></div>
+      <div class="diff-cell">${tv||'<span style="color:var(--muted)">—</span>'}</div>`;
+    el.appendChild(row);
+  });
+  setTimeout(()=>{el.querySelectorAll('.bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%';});},120);
+}
+
+// ── PARTS (blancs/nuls/total) ────────────────────────────────
+function renderParts(disp,data,cid){
+  const el=document.getElementById(cid); if(!el)return;
+  const valids=totV(disp), blancs=data.blancs||0, nuls=data.nuls||0, tot=valids+blancs+nuls;
+  el.innerHTML=`<div class="part-section anim"><div class="part-grid">
+    <div><div class="part-label">Vots a candidatures</div><div class="part-value">${fN(valids)}</div><div class="part-sub">${pct(valids,tot)}% dels emesos</div></div>
+    <div><div class="part-label">Vots en blanc</div><div class="part-value">${fN(blancs)}</div><div class="part-sub">${pct(blancs,tot)}%</div></div>
+    <div><div class="part-label">Vots nuls</div><div class="part-value">${fN(nuls)}</div><div class="part-sub">${pct(nuls,tot)}%</div></div>
+    <div><div class="part-label">Total vots emesos</div><div class="part-value">${fN(tot)}</div><div class="part-sub">Cens: ${fN(data.cens||0)}</div></div>
+  </div></div>`;
+}
+
+// ── MUNI TABLE ───────────────────────────────────────────────
+function renderMuniTable(dispMunis,keys,cid,histTotal,histMuni){
+  const el=document.getElementById(cid); if(!el)return;
+  let html=`<div class="results-card anim"><div class="results-card-header">
+    <span class="results-card-title">Resultats per municipi</span>
+    <span class="results-card-meta">Vots i % per candidatura · ▲▼ vs. 23J 2023</span>
+  </div><div class="muni-table-wrap"><table class="muni-table"><thead><tr>
+    <th>Municipi</th><th class="scrut-th">Escrutat</th><th>Part.</th>`;
+  keys.forEach(k=>{html+=`<th style="color:${colorOf(k)}">${k}</th>`;});
+  html+=`</tr></thead><tbody>`;
+  dispMunis.forEach(m=>{
+    const tot=keys.reduce((s,k)=>s+(m.vots[k]||0),0);
+    const wk=Object.entries(m.vots).sort((a,b)=>b[1]-a[1])[0];
+    const sp=m.meses>0?Math.round(m.mesasEscr/m.meses*100):0, mk=muniKey(m.nom);
+    const hM=histMuni&&histMuni[mk]?histMuni[mk]:null;
+    html+=`<tr><td><span style="display:inline-block;width:7px;height:7px;background:${colorOf(wk?wk[0]:'')};border-radius:50%;margin-right:6px;vertical-align:middle"></span>${m.nom}</td>
+      <td style="text-align:center"><div class="scrut-mini" style="color:${sp>=100?'var(--up)':'var(--accent2)'}">${sp}%</div>
+        <div class="scrut-mini-bar"><div class="scrut-mini-fill" style="width:${sp}%"></div></div>
+        <div style="font-size:.58rem;color:var(--muted)">${m.mesasEscr}/${m.meses}</div></td>
+      <td style="color:var(--muted);font-size:.68rem">${m.part||'—'}</td>`;
+    keys.forEach(k=>{
+      const v=m.vots[k]||0, p=tot>0?((v/tot)*100).toFixed(1):'0.0', isW=wk&&wk[0]===k;
+      const ar=arrowMini(v,hM?hM[k]:null);
+      html+=`<td style="${isW?`font-weight:700;color:${colorOf(k)}`:''}">${fN(v)}${ar}<br><span style="font-size:.6rem;color:var(--muted)">${p}%</span></td>`;
+    });
+    html+=`</tr>`;
+  });
+  const tots={}; keys.forEach(k=>tots[k]=dispMunis.reduce((s,m)=>s+(m.vots[k]||0),0));
+  const gt=Object.values(tots).reduce((a,b)=>a+b,0);
+  const tM=dispMunis.reduce((s,m)=>s+(m.meses||0),0), tE=dispMunis.reduce((s,m)=>s+(m.mesasEscr||0),0);
+  const spT=tM>0?Math.round(tE/tM*100):0;
+  html+=`<tr class="total-row"><td>TOTAL MENORCA</td>
+    <td style="text-align:center;font-size:.68rem">${spT}%<br><span style="opacity:.5;font-size:.6rem">${tE}/${tM}</span></td>
+    <td style="opacity:.4">—</td>`;
+  keys.forEach(k=>{const v=tots[k],p=gt>0?((v/gt)*100).toFixed(1):'0.0';const ar=arrowMini(v,histTotal?histTotal[k]:null);
+    html+=`<td>${fN(v)}${ar}<br><span style="font-size:.6rem;opacity:.5">${p}%</span></td>`;});
+  html+=`</tr></tbody></table></div></div>`;
+  el.innerHTML=html;
+}
+
+// ── RENDER ELECTION ──────────────────────────────────────────
+function renderElection(key,data,isSenat){
+  const el=document.getElementById('panel-'+key); if(!el)return;
+  // 1) candidatures completes (des dels municipis) → agregat illa
+  const full=partitsFromMunicipis(data);
+  data.blancs=data.municipis.reduce((s,m)=>s+(m.blancs||0),0);
+  data.nuls=data.municipis.reduce((s,m)=>s+(m.nuls||0),0);
+  // 2) agrupació "Altres" (< 5% dels vots de Menorca)
+  const {disp,otherNoms}=buildDisplay(full);
+  const dispKeys=disp.map(p=>p.nom);
+  const histFull=HIST_VOTES[key];
+  const dispMunis=displayMunicipis(data.municipis,dispKeys,otherNoms);
+  const histTotalDisp=displayHist(histFull,dispKeys,otherNoms);
+  const histMuniDisp={}; const rawHistMuni=HIST_VOTES_MUNI[key]||{};
+  Object.keys(rawHistMuni).forEach(mk=>histMuniDisp[mk]=displayHist(rawHistMuni[mk],dispKeys,otherNoms));
+
+  el.innerHTML=`
+    <div class="section-kicker">Resultats · Illa de Menorca</div>
+    <div class="section-heading">${data.label}</div>
+    ${scrutCardHTML(data)}
+    ${isSenat?senatorCardHTML(disp):''}
+    <div class="hemi-card anim" style="margin-bottom:22px">
+      <div class="hemi-label">Quota de vot</div>
+      <div class="hemi-title">Distribució del vot · % sobre el total de Menorca</div>
+      <div class="hemi-sub">Doble arc: exterior = actual · interior = 23J 2023</div>
+      <svg class="hemi" viewBox="0 0 400 250" id="hemi-${key}" style="max-width:540px;display:block;margin:6px auto 0"></svg>
+    </div>
+    <div class="results-card anim">
+      <div class="results-card-header"><span class="results-card-title">Resultats per candidatura · Menorca</span>
+        <span class="results-card-meta">Agregat illa · ▲▼ vs. 23J 2023</span></div>
+      <div class="table-head"><div>Candidatura</div><div>Vots</div><div>%</div><div>Representació</div><div>Dif. 2023</div></div>
+      <div id="rows-${key}"></div>
+    </div>
+    <div id="parts-${key}"></div>
+    <div class="section-kicker" style="margin-bottom:5px">Desglossat per municipi</div>
+    <div id="muni-${key}"></div>`;
+
+  renderRows(disp,'rows-'+key,histTotalDisp);
+  renderParts(disp,data,'parts-'+key);
+  renderMuniTable(dispMunis,dispKeys,'muni-'+key,histTotalDisp,histMuniDisp);
+  drawHemi('hemi-'+key,disp,histTotalDisp);
+}
+
+// ── TABS / CLOCK ─────────────────────────────────────────────
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const btn=[...document.querySelectorAll('.tab-btn')].find(b=>b.getAttribute('onclick').includes("'"+id+"'"));
+  if(btn)btn.classList.add('active');
+  const panel=document.getElementById('panel-'+id); if(panel)panel.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  postHeight();
+}
+// Si està incrustat en un iframe (WordPress), comunica l'alçada al contenidor
+function postHeight(){
+  if(window.parent && window.parent!==window){
+    try{ window.parent.postMessage({menorcaGeneralsHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)}, '*'); }catch(e){}
+  }
+}
+function updateClock(){const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  ['clock-val','footer-time'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t;});}
+function startCountdown(){let cd=REFRESH_SECONDS;setInterval(()=>{cd--;const e=document.getElementById('countdown-val');
+  if(e)e.textContent=Math.floor(cd/60)+':'+(cd%60).toString().padStart(2,'0');
+  if(cd<0){cd=REFRESH_SECONDS;loadData().then(renderAll);}},1000);}
+
+async function loadData(){ if(!JSON_URL)return CURRENT; try{const r=await fetch(JSON_URL);return await r.json();}catch(e){console.warn('Dades de prova',e);return CURRENT;} }
+function renderAll(raw){
+  const data=raw.eleccions||raw;
+  try{ if(data.congres)renderElection('congres',data.congres,false); }catch(e){console.error('Congrés:',e.message);}
+  try{ if(data.senat)renderElection('senat',data.senat,true); }catch(e){console.error('Senat:',e.message);}
+}
+document.addEventListener('DOMContentLoaded',async()=>{
+  updateClock();setInterval(updateClock,30000);
+  const data=await loadData(); renderAll(data); startCountdown();
+  postHeight(); setInterval(postHeight,1000);
+});
+window.addEventListener('load',postHeight);
+window.addEventListener('resize',postHeight);
+</script>
+</body>
+</html>
