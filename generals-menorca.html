@@ -632,8 +632,24 @@ function startCountdown(){let cd=REFRESH_SECONDS;setInterval(()=>{cd--;const e=d
   if(cd<0){cd=REFRESH_SECONDS;loadData().then(renderAll);}},1000);}
 
 async function loadData(){ if(!JSON_URL)return CURRENT; try{const r=await fetch(JSON_URL);return await r.json();}catch(e){console.warn('Dades de prova',e);return CURRENT;} }
+// Aplica la configuració de candidatures que ve del full CONFIG del Sheet:
+// color, nom complet, ordre al gràfic i equivalent 2023. Així no cal tocar
+// mai l'HTML per afegir, reordenar, recolorejar o renombrar candidatures.
+function applyConfig(cfg){
+  if(!cfg || !cfg.length) return;
+  cfg.forEach(c=>{
+    if(!c || !c.nom) return;
+    if(c.color)   C[c.nom]=c.color;
+    if(c.complet) NOMS[c.nom]=c.complet;
+    if(c.equiv)   HIST_MAP[c.nom]=c.equiv;
+  });
+  const ordered=cfg.filter(c=>c && c.nom).slice()
+    .sort((a,b)=>(a.ordre||999)-(b.ordre||999)).map(c=>c.nom);
+  if(ordered.length){ PARTY_ORDER.length=0; ordered.forEach(n=>PARTY_ORDER.push(n)); }
+}
 function renderAll(raw){
   const data=raw.eleccions||raw;
+  try{ applyConfig(raw.config); }catch(e){ console.warn('config',e.message); }
   try{ if(data.congres)renderElection('congres',data.congres,false); }catch(e){console.error('Congrés:',e.message);}
   try{ if(data.senat)renderElection('senat',data.senat,true); }catch(e){console.error('Senat:',e.message);}
 }
