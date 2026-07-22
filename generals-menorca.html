@@ -499,7 +499,9 @@ function drawHemi(svgId, disp, histVotes){
 // ── ROWS (candidatures) ──────────────────────────────────────
 function renderRows(disp,cid,histV){
   const total=totV(disp), el=document.getElementById(cid); if(!el)return; el.innerHTML='';
-  disp.forEach((p,i)=>{
+  // Aquesta taula s'ordena per vots (de més a menys). El gràfic manté l'ordre del CONFIG.
+  const files=[...disp].sort((a,b)=>(b.vots||0)-(a.vots||0));
+  files.forEach((p,i)=>{
     const p100=pct(p.vots,total), tv=trendV(p.nom,histV,p.vots), col=colorOf(p.nom);
     const row=document.createElement('div'); row.className='table-row anim'; row.style.animationDelay=(i*.05)+'s';
     row.innerHTML=`
