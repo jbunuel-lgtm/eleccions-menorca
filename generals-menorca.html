@@ -454,9 +454,21 @@ function drawHemi(svgId, disp, histVotes){
       deg=endDeg-GAP;
     });
   }
-  // Arc interior (23J 2023)
-  const histList=ordered.map(p=>({nom:p.nom,vots:(histVotes&&histVotes[p.nom])||0})).filter(p=>p.vots>0);
-  histList.sort((a,b)=>orderOf(a.nom)-orderOf(b.nom));
+  // Arc interior (23J 2023) — distribució REAL de 2023 (formacions d'aleshores),
+  // independent de les candidatures d'ara. Agrupa a "Altres" les < 5% del total de 2023.
+  const HIST_ORDER=['PSOE','MÉS-SUMAR','Altres','VOX','PP','PACMA','FO','PCTE','RECORTES','Cs'];
+  const orderHist=n=>{const i=HIST_ORDER.indexOf(n);return i<0?800:i;};
+  let histList=[];
+  if(histVotes){
+    const ent=Object.keys(histVotes).map(k=>({nom:k,vots:histVotes[k]||0})).filter(p=>p.vots>0);
+    const ht=ent.reduce((s,p)=>s+p.vots,0);
+    const keepH=[],othH=[];
+    ent.forEach(p=>{ if(ht>0 && p.vots/ht<ALTRES_THRESHOLD){othH.push(p);} else {keepH.push(p);} });
+    const ovH=othH.reduce((s,p)=>s+p.vots,0);
+    if(ovH>0) keepH.push({nom:'Altres',vots:ovH});
+    histList=keepH;
+  }
+  histList.sort((a,b)=>orderHist(a.nom)-orderHist(b.nom));
   const histTotal=histList.reduce((s,p)=>s+p.vots,0);
   renderArc(histList,I_R1,I_R2,0.4,false);
   // Arc exterior (actual)
@@ -608,7 +620,7 @@ function renderElection(key,data,isSenat){
   renderRows(disp,'rows-'+key,histTotalDisp);
   renderParts(disp,data,'parts-'+key);
   renderMuniTable(dispMunis,dispKeys,'muni-'+key,histTotalDisp,histMuniDisp);
-  drawHemi('hemi-'+key,disp,histTotalDisp);
+  drawHemi('hemi-'+key,disp,histFull);
 }
 
 // ── TABS / CLOCK ─────────────────────────────────────────────
