@@ -486,17 +486,26 @@ function drawHemi(svgId, disp, histVotes){
   // Llegenda (2 línies) — mostra el % de vot
   function legendRow(items,total,ly,alpha,fontSize){
     if(!items.length||total<=0)return;
-    const itemW=Math.min(74,(W-32)/items.length),totalW=items.length*itemW,startX=(W-totalW)/2;
-    items.forEach((p,i)=>{const lx=startX+i*itemW,sz=parseInt(fontSize);
+    const sz0=parseInt(fontSize), GAPI=8, AVAIL=W-16;
+    const labels=items.map(p=>p.nom+' ('+(p.vots/total*100).toFixed(1)+'%)');
+    // amplada estimada de cada element = quadret + text (sobreestimem per no trepitjar-se)
+    const w0=labels.map(t=> sz0+3 + t.length*sz0*0.56);
+    const raw=w0.reduce((a,b)=>a+b,0)+GAPI*(items.length-1);
+    const scale=raw>AVAIL?AVAIL/raw:1, fs=Math.max(5,sz0*scale), gap=GAPI*scale;
+    const wds=w0.map(w=>w*scale);
+    let x=(W-(wds.reduce((a,b)=>a+b,0)+gap*(items.length-1)))/2;
+    items.forEach((p,i)=>{
       const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
-      r.setAttribute('x',lx.toFixed(1));r.setAttribute('y',(ly-sz+1).toFixed(1));
-      r.setAttribute('width',(sz-1).toString());r.setAttribute('height',(sz-1).toString());
+      r.setAttribute('x',x.toFixed(1));r.setAttribute('y',(ly-fs+1).toFixed(1));
+      r.setAttribute('width',(fs-1).toFixed(1));r.setAttribute('height',(fs-1).toFixed(1));
       r.setAttribute('rx','2');r.setAttribute('fill',colorOf(p.nom));r.setAttribute('opacity',alpha);svg.appendChild(r);
       const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',(lx+sz+2).toFixed(1));t.setAttribute('y',ly.toFixed(1));
-      t.setAttribute('font-size',fontSize);t.setAttribute('font-weight','600');t.setAttribute('fill',`rgba(26,20,16,${alpha})`);
+      t.setAttribute('x',(x+fs+2).toFixed(1));t.setAttribute('y',ly.toFixed(1));
+      t.setAttribute('font-size',fs.toFixed(2));t.setAttribute('font-weight','600');t.setAttribute('fill',`rgba(26,20,16,${alpha})`);
       t.setAttribute('font-family','-apple-system,Helvetica,Arial,sans-serif');
-      t.textContent=p.nom+' ('+(p.vots/total*100).toFixed(1)+'%)';svg.appendChild(t);});
+      t.textContent=labels[i];svg.appendChild(t);
+      x+=wds[i]+gap;
+    });
   }
   function yearLabel(txt,ly,alpha,fw){const t=document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x','4');t.setAttribute('y',ly.toFixed(1));t.setAttribute('font-size','6.5');t.setAttribute('font-weight',fw);
