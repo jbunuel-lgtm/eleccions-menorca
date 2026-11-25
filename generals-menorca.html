@@ -400,8 +400,9 @@ function drawHemi(svgId, disp, histVotes){
   const cx=W/2, cy=H-52;
   const O_R1=115,O_R2=178, I_R1=48,I_R2=105;
   const SPREAD=170, START_DEG=90+SPREAD/2, GAP=1.2;
-  const orderOf=n=>{const i=PARTY_ORDER.indexOf(n);return i<0?900:i;};
-  const ordered=[...disp].sort((a,b)=>orderOf(a.nom)-orderOf(b.nom));
+  // L'arc exterior segueix EXACTAMENT l'ordre de "disp" (el mateix de la taula,
+  // que ja ve ordenat segons el CONFIG del Sheet: 1r a l'esquerra, 2n a la dreta...).
+  const ordered=disp;
 
   function xy(r,deg){const rad=deg*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
   function drawSector(r1,r2,fromDeg,toDeg,color,opacity){
